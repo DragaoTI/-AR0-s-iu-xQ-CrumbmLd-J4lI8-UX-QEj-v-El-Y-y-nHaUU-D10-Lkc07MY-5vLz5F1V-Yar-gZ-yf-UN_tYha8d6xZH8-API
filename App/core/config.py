@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str # Use a service_role key se for criar usuários/manipular dados restritos
 
     # JWT
-    JWT_PRIVATE_KEY_PATH: Path = Path("rsa_private_key.pem")
-    JWT_PUBLIC_KEY_PATH: Path = Path("rsa_public_key.pem")
+    JWT_PRIVATE_KEY_CONTENT: str # Nova variável para o conteúdo da chave
+    JWT_PUBLIC_KEY_CONTENT: str  # Nova variável para o conteúdo da chave
     JWT_ALGORITHM: str = "RS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
