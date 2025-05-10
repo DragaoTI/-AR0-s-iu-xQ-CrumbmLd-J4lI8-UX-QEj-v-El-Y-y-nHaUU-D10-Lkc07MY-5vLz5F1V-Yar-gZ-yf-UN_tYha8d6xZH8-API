@@ -4,7 +4,7 @@ pydantic
 pydantic-settings
 python-jose[cryptography] # Para JWT com RS256
 passlib[bcrypt] # Para hashing de senhas, embora Supabase cuide disso
-supabase-py
+supabase
 httpx # Para chamadas HTTP assíncronas (GeoIP)
 slowapi # Para rate limiting
 python-dotenv
