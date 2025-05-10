@@ -1,1 +1,48 @@
+services:
+  - type: web
+    name: CrosshairLab API # Nome do seu serviço no Render
+    env: docker # Ou python se você não quiser usar Docker e instalar direto
+    # Se env: python, especifique pythonVersion e buildCommand, startCommand
+    # pythonVersion: "3.11"
+    # buildCommand: "pip install -r requirements.txt"
+    # startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
 
+    # Configurações para Docker
+    dockerfilePath: ./Dockerfile
+    # dockerCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT" # Opcional, se o CMD do Dockerfile não for suficiente
+
+    healthCheckPath: / # Ou uma rota específica de health check /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION # Exemplo, Render define automaticamente para Python runtime
+        value: "3.11"
+      - key: SUPABASE_URL
+        fromSecret: true # Crie este segredo no Render
+      - key: SUPABASE_KEY
+        fromSecret: true # Crie este segredo no Render
+      - key: JWT_ALGORITHM
+        value: RS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 60
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: 7
+      - key: IPAPI_URL
+        value: "https://ipapi.co"
+      # Chaves RSA como segredos multi-linha no Render:
+      - key: JWT_PRIVATE_KEY_PATH
+        value: rsa_private_key.pem # Se você copiar os arquivos para o container
+      - key: JWT_PUBLIC_KEY_PATH
+        value: rsa_public_key.pem  # Se você copiar os arquivos para o container
+      # Alternativa para chaves: colar o conteúdo como segredo no Render
+      # e modificar config.py para ler de variáveis de ambiente tipo JWT_PRIVATE_KEY_CONTENT
+      # - key: JWT_PRIVATE_KEY_CONTENT
+      #   fromSecret: true # Colar o conteúdo da chave aqui no Render
+      # - key: JWT_PUBLIC_KEY_CONTENT
+      #   fromSecret: true # Colar o conteúdo da chave aqui no Render
+
+    # Planos e Região (exemplo)
+    plan: free # Ou standard, pro, etc.
+    region: frankfurt # Ou a região mais próxima de você/seus usuários
+
+    # Auto Deploy (opcional, mas recomendado)
+    autoDeploy: true # Ou false
+    branch: main # Ou o branch que você quer usar para deploy
