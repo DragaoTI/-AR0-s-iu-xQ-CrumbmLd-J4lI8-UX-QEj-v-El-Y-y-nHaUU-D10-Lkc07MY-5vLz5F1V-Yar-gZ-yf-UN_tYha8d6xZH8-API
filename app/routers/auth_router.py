@@ -11,6 +11,7 @@ from app.auth.dependencies import get_current_active_user
 from app.utils.rate_limiter import limiter
 from app.core.config import settings
 from datetime import timedelta, datetime, timezone
+from typing import Optional
 import uuid
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
