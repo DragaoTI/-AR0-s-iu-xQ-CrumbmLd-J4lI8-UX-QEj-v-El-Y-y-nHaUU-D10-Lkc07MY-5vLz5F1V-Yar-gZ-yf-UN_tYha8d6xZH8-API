@@ -2,7 +2,7 @@
 
 // MUITO IMPORTANTE: Substitua pela URL real da sua API no Render
 // Exemplo: const API_BASE_URL = 'https://minha-api-admin.onrender.com/api/v1';
-const API_BASE_URL = 'http://localhost:8000/api/v1'; // Para desenvolvimento local com FastAPI na porta 8000
+const API_BASE_URL = 'https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com'; // Para desenvolvimento local com FastAPI na porta 8000
 
 // Chaves para o sessionStorage (mais seguro que localStorage para tokens de sessão)
 const TOKEN_STORAGE_KEY = 'adminAuthToken_v1'; // Adicionar versão caso precise limpar tokens antigos
