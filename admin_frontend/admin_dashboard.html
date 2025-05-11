@@ -3,9 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 
+        Content Security Policy (CSP) - AJUSTADA E LIMPA
+        Certifique-se de que não há caracteres estranhos ou comentários dentro do atributo "content".
+        Substitua 'https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com' pela URL EXATA da sua API.
+    -->
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self'; 
-                   script-src 'self'; 
+                   script-src 'self'; /* FingerprintJS não é carregado nesta página, então não precisa do CDN aqui */
                    style-src 'self'; 
                    connect-src 'self' https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com;
                    img-src 'self' data:;
@@ -17,13 +22,13 @@
                    manifest-src 'self';
                    worker-src 'none';
                    upgrade-insecure-requests;">
+    
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
     <title>Admin Dashboard - Painel Seguro</title>
     <link rel="stylesheet" href="admin_style.css">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div class="dashboard-container">
@@ -36,15 +41,12 @@
         </header>
         
         <nav class="dashboard-nav">
-            <!-- Links de navegação podem ser adicionados aqui -->
-            <!-- <button data-section="overview">Visão Geral</button> -->
             <button data-section="manageAdmins" class="button">Gerenciar Admins</button>
-            <!-- <button data-section="logs">Ver Logs</button> -->
+            <!-- Adicionar mais botões de navegação aqui conforme necessário -->
         </nav>
 
         <main id="mainDashboardContent" class="dashboard-content">
             <p>Bem-vindo! Selecione uma opção no menu.</p>
-            <!-- O conteúdo dinâmico será renderizado aqui -->
         </main>
 
         <p id="dashboardMessage" class="message-area" aria-live="assertive"></p>
