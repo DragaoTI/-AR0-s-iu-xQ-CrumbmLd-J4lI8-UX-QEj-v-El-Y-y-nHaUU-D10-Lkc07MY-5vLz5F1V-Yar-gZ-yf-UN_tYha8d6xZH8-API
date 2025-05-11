@@ -1,11 +1,15 @@
 /* admin_frontend/admin_style.css */
+/* (Estilos da resposta anterior - são um bom ponto de partida) */
+/* Certifique-se de que todos os estilos 'inline' foram movidos para cá */
+/* para que você possa remover 'unsafe-inline' da diretiva style-src na CSP. */
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #eef2f5; /* Cor de fundo mais suave */
+    background-color: #eef2f5;
     margin: 0;
     color: #333;
     line-height: 1.6;
@@ -23,12 +27,13 @@ body {
 }
 
 .dashboard-container {
-    max-width: 900px;
+    max-width: 950px; /* Um pouco mais largo para conteúdo */
     text-align: left;
+    margin: 20px; /* Espaço nas laterais em telas menores */
 }
 
 h2, h3, h4 {
-    color: #2c3e50; /* Tom de azul escuro */
+    color: #2c3e50;
     margin-top: 0;
 }
 
@@ -37,18 +42,17 @@ h2 {
     font-size: 1.8em;
 }
 h3 {
-    margin-bottom: 15px;
-    font-size: 1.4em;
-    border-bottom: 2px solid #ecf0f1; /* Divisor sutil */
-    padding-bottom: 10px;
+    margin-bottom: 20px; /* Mais espaço */
+    font-size: 1.5em; /* Tamanho ajustado */
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 12px;
 }
 h4 {
-    margin-top: 25px;
-    margin-bottom: 10px;
-    font-size: 1.2em;
+    margin-top: 30px; /* Mais espaço */
+    margin-bottom: 15px;
+    font-size: 1.25em;
     color: #34495e;
 }
-
 
 .form-group {
     margin-bottom: 22px;
@@ -59,35 +63,45 @@ h4 {
     display: block;
     margin-bottom: 8px;
     color: #555f6b;
-    font-weight: 600; /* Um pouco mais de peso */
+    font-weight: 600;
     font-size: 0.95em;
 }
 
 .form-group input[type="text"],
 .form-group input[type="password"],
-#createAdminForm input[type="text"],
-#createAdminForm input[type="password"] {
-    width: 100%; /* Ocupa toda a largura disponível */
+.form-section input[type="text"], /* Para formulários no dashboard */
+.form-section input[type="password"],
+.form-section select {
+    width: 100%;
     padding: 12px 15px;
-    border: 1px solid #bdc3c7; /* Borda mais definida */
+    border: 1px solid #bdc3c7;
     border-radius: 6px;
     box-sizing: border-box;
     font-size: 1em;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+.form-section select {
+    appearance: none; /* Estilo customizado para select */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right .7em top 50%, 0 0;
+    background-size: .65em auto, 100%;
+    padding-right: 2.5em; /* Espaço para a seta */
+}
+
 
 .form-group input[type="text"]:focus,
 .form-group input[type="password"]:focus,
-#createAdminForm input[type="text"]:focus,
-#createAdminForm input[type="password"]:focus {
-    border-color: #3498db; /* Cor de destaque no foco */
+.form-section input[type="text"]:focus,
+.form-section input[type="password"]:focus,
+.form-section select:focus {
+    border-color: #3498db;
     box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
     outline: none;
 }
 
-
-button[type="submit"], .dashboard-container button {
-    background-color: #3498db; /* Azul mais vibrante */
+button, .button { /* Classe genérica para botões */
+    background-color: #3498db;
     color: white;
     padding: 12px 25px;
     border: none;
@@ -96,58 +110,66 @@ button[type="submit"], .dashboard-container button {
     font-size: 1.05em;
     font-weight: 600;
     transition: background-color 0.2s ease, transform 0.1s ease;
-    width: 100%; /* Botão de login ocupa largura total */
-    margin-top: 10px; /* Espaço acima do botão */
+    text-decoration: none; /* Para links estilizados como botões */
+    display: inline-block; /* Para links estilizados como botões */
 }
-.dashboard-container button {
-    width: auto; /* Botões no dashboard não precisam ser full-width */
+#loginButton { /* Específico para o botão de login */
+    width: 100%; 
+    margin-top: 10px;
+}
+
+.dashboard-container button, .dashboard-container .button {
+    width: auto;
     padding: 10px 18px;
     font-size: 0.95em;
+    margin-right: 10px; /* Espaçamento entre botões */
+}
+.dashboard-container button:last-child, .dashboard-container .button:last-child {
+    margin-right: 0;
 }
 
 
-button[type="submit"]:hover, .dashboard-container button:hover {
-    background-color: #2980b9; /* Azul mais escuro no hover */
+button:hover, .button:hover {
+    background-color: #2980b9;
 }
-button[type="submit"]:active, .dashboard-container button:active {
-    transform: translateY(1px); /* Efeito de clique sutil */
+button:active, .button:active {
+    transform: translateY(1px);
 }
-button:disabled {
-    background-color: #a3cde7;
+button:disabled, .button:disabled {
+    background-color: #bdc3c7; /* Cinza mais claro para desabilitado */
     cursor: not-allowed;
+    color: #7f8c8d;
 }
-
 
 .message-area {
     margin-top: 20px;
-    padding: 12px;
+    padding: 12px 15px;
     border-radius: 6px;
-    font-size: 0.9em;
+    font-size: 0.95em; /* Um pouco maior */
     text-align: center;
-    display: none; /* Escondido por padrão */
+    display: none;
     border-width: 1px;
     border-style: solid;
 }
 .error-message {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
-    display: block; /* Mostrar quando tiver conteúdo */
+    background-color: #ffebee; /* Vermelho mais suave */
+    color: #c62828; /* Vermelho escuro para texto */
+    border-color: #ef9a9a; /* Borda vermelha suave */
+    display: block;
 }
 .success-message {
-    background-color: #d4edda;
-    color: #155724;
-    border-color: #c3e6cb;
-    display: block; /* Mostrar quando tiver conteúdo */
+    background-color: #e8f5e9; /* Verde mais suave */
+    color: #2e7d32; /* Verde escuro para texto */
+    border-color: #a5d6a7; /* Borda verde suave */
+    display: block;
 }
 
-/* Dashboard específico */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
+    margin-bottom: 30px; /* Mais espaço */
+    padding-bottom: 20px;
     border-bottom: 2px solid #ecf0f1;
 }
 
@@ -155,13 +177,34 @@ button:disabled {
     margin-right: 20px;
     font-style: italic;
     color: #555f6b;
+    font-weight: 500;
 }
 
-.dashboard-content ul {
+.dashboard-content {
+    margin-top: 20px;
+}
+
+.form-section { /* Para seções com formulários no dashboard */
+    background-color: #fdfdfd;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #e1e5e8;
+    margin-bottom: 30px;
+}
+.form-section small {
+    display: block;
+    margin-top: -8px;
+    margin-bottom: 12px;
+    font-size: 0.85em;
+    color: #7f8c8d;
+}
+
+
+.admin-list ul {
     list-style: none;
     padding: 0;
 }
-.dashboard-content li {
+.admin-list li {
     background-color: #f9fafb;
     border: 1px solid #e1e5e8;
     padding: 12px 15px;
@@ -170,31 +213,37 @@ button:disabled {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: background-color 0.2s ease;
 }
-.dashboard-content li .actions a {
-    margin-left: 10px;
+.admin-list li:hover {
+    background-color: #f1f5f9;
+}
+
+.admin-list .admin-info {
+    flex-grow: 1;
+}
+.admin-list .admin-info strong {
+    color: #2c3e50;
+}
+
+.admin-list .actions a, .admin-list .actions button {
+    margin-left: 12px;
     color: #3498db;
     text-decoration: none;
     font-weight: 500;
+    font-size: 0.9em;
+    background: none;
+    border: none;
+    padding: 5px 8px;
+    cursor: pointer;
 }
-.dashboard-content li .actions a:hover {
+.admin-list .actions a:hover, .admin-list .actions button:hover {
     text-decoration: underline;
     color: #2980b9;
 }
-
-#createAdminForm {
-    background-color: #f9fafb;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #e1e5e8;
-    margin-top: 15px;
+.admin-list .actions button.delete-admin {
+    color: #e74c3c;
 }
-#createAdminForm input {
-    margin-bottom: 12px;
-}
-#createAdminForm button {
-    width: auto; /* Botão de criar admin não full-width */
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+.admin-list .actions button.delete-admin:hover {
+    color: #c0392b;
 }
