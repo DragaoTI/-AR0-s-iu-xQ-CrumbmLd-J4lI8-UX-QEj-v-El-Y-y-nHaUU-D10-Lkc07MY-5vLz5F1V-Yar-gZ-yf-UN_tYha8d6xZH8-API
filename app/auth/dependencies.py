@@ -6,6 +6,7 @@ from app.services.supabase_service import supabase_service # Importa a instânci
 from app.models.user import User
 from typing import Optional
 import uuid
+from app.core.config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login") # Ajuste o tokenUrl
 
