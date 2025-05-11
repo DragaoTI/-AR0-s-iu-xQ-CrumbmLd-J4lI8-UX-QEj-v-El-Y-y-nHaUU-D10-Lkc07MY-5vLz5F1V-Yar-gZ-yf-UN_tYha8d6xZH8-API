@@ -36,26 +36,38 @@ class AdminService:
         if not self.db:
             print("DEBUG_GET_ADMIN: self.db é None, retornando None.")
             return None
-        print(f"DEBUG_GET_ADMIN: Tentando buscar admin '{username}'...")
+        
+        target_username = str(username) # Garante que é uma string
+        print(f"DEBUG_GET_ADMIN: Tentando buscar admin com username EXATO: '{target_username}'")
+        
         try:
-            # TESTE: Tentar selecionar apenas o ID, e não usar maybe_single() por enquanto
-            response = self.db.table("administrators").select("id, username, password_hash, client_hwid_identifier_hash, status, last_login_at, created_at, updated_at").eq("username", username).limit(1).execute()
+            # Tentar uma query direta e pegar o primeiro resultado se houver
+            response = self.db.table("administrators").select("*").eq("username", target_username).execute()
             
-            print(f"DEBUG_GET_ADMIN: Resposta bruta do Supabase: {response}") # LOG IMPORTANTE
-            
-            if response and hasattr(response, 'data'): # Verifica se response e response.data existem
+            print(f"DEBUG_GET_ADMIN: Resposta bruta do Supabase para username '{target_username}': data='{response.data}', count='{response.count}'")
+                
+            if response and hasattr(response, 'data'):
                 if response.data and len(response.data) > 0:
-                    print(f"DEBUG_GET_ADMIN: Dados encontrados para '{username}': {response.data[0]}")
-                    return Administrator(**response.data[0])
+                    # Se mais de um usuário for retornado (o que não deveria acontecer se username é UNIQUE),
+                    # pegamos o primeiro.
+                    admin_data_dict = response.data[0]
+                    print(f"DEBUG_GET_ADMIN: Dados encontrados para '{target_username}': {admin_data_dict}")
+                    return Administrator(**admin_data_dict)
                 else:
-                    print(f"DEBUG_GET_ADMIN: Nenhum dado encontrado para '{username}' (response.data está vazio).")
-                    return None
+                    print(f"DEBUG_GET_ADMIN: Nenhum dado encontrado para '{target_username}' (response.data está vazio ou é None).")
+                    # TENTATIVA ADICIONAL: query com ILIKE para ver se é case-sensitivity, embora os dados pareçam idênticos
+                    print(f"DEBUG_GET_ADMIN: Tentando busca case-insensitive com ILIKE para '{target_username}'...")
+                    response_ilike = self.db.table("administrators").select("*").ilike("username", target_username).execute()
+                    print(f"DEBUG_GET_ADMIN: Resposta ILIKE do Supabase: data='{response_ilike.data}', count='{response_ilike.count}'")
+                    if response_ilike and response_ilike.data and len(response_ilike.data) > 0:
+                        print(f"AVISO_GET_ADMIN: Usuário encontrado com ILIKE mas não com EQ. Problema de CASING no DB ou na query? Data ILIKE: {response_ilike.data[0]}")
+                        # Não retorna aqui, pois a autenticação deve ser exata. Mas isso nos dá uma pista.
+                    return None # Mantém o retorno None se a busca exata falhou
             else:
-                # Se response for None ou não tiver 'data', isso é um problema sério com a chamada ao Supabase
-                print(f"ERRO_GET_ADMIN: Objeto de resposta do Supabase inválido ou None para '{username}'. Response: {response}")
+                print(f"ERRO_GET_ADMIN: Objeto de resposta do Supabase inválido ou None para '{target_username}'. Response: {response}")
                 return None
         except Exception as e:
-            print(f"EXCEÇÃO em get_admin_by_username para '{username}': {e}")
+            print(f"EXCEÇÃO em get_admin_by_username para '{target_username}': {e}")
             import traceback
             traceback.print_exc()
             return None
