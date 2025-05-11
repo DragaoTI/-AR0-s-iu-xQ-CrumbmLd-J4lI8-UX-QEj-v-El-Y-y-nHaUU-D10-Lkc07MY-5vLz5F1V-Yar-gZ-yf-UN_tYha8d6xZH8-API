@@ -2,7 +2,7 @@
 
 // URL base COMPLETA para os endpoints da API do painel de administração.
 // Inclui o /api/v1 e o prefixo /admin-panel do router.
-const API_PANEL_ENDPOINTS_BASE = 'https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com/api/v1/x9A7uQvP2LmZn53BqC-adm';
+const API_PANEL_ENDPOINTS_BASE = 'https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com/api/v1/admin-panel';
 // Para desenvolvimento local, você pode ter:
 // const API_PANEL_ENDPOINTS_BASE = 'http://localhost:8000/api/v1/admin-panel';
 
