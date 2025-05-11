@@ -6,34 +6,48 @@
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self'; 
                    script-src 'self'; 
-                   style-src 'self' 'unsafe-inline'; /* Tente remover 'unsafe-inline' */
-                   connect-src 'self' http://localhost:8000 https://sua-api-no-render.onrender.com; /* Permita localhost E sua URL de produção */
+                   style-src 'self'; 
+                   connect-src 'self' https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com;
                    img-src 'self' data:;
                    font-src 'self';
-                   form-action 'none'; /* Nenhum <form action=""> permitido */
+                   form-action 'none'; 
                    frame-ancestors 'none';
                    base-uri 'self';
                    object-src 'none';
+                   manifest-src 'self';
+                   worker-src 'none';
                    upgrade-insecure-requests;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
     <title>Admin Dashboard - Painel Seguro</title>
     <link rel="stylesheet" href="admin_style.css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div class="dashboard-container">
         <header class="dashboard-header">
             <h2>Painel de Administração</h2>
             <div>
-                <span id="loggedInUser"></span>
-                <button id="logoutButton">Sair</button>
+                <span id="loggedInUser">Carregando...</span>
+                <button id="logoutButton" class="button">Sair</button>
             </div>
         </header>
         
-        <main id="mainContent" class="dashboard-content">
-            <p>Carregando conteúdo do painel...</p>
-            <!-- O conteúdo dinâmico (lista de admins, formulários, etc.) será inserido aqui -->
+        <nav class="dashboard-nav">
+            <!-- Links de navegação podem ser adicionados aqui -->
+            <!-- <button data-section="overview">Visão Geral</button> -->
+            <button data-section="manageAdmins" class="button">Gerenciar Admins</button>
+            <!-- <button data-section="logs">Ver Logs</button> -->
+        </nav>
+
+        <main id="mainDashboardContent" class="dashboard-content">
+            <p>Bem-vindo! Selecione uma opção no menu.</p>
+            <!-- O conteúdo dinâmico será renderizado aqui -->
         </main>
 
-        <p id="dashboardMessage" class="message-area"></p>
+        <p id="dashboardMessage" class="message-area" aria-live="assertive"></p>
     </div>
 
     <script src="admin_app_config.js"></script>
