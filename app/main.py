@@ -74,6 +74,8 @@ else:
     print(f"AVISO:    Diretório UI do Admin NÃO ENCONTRADO em '{FRONTEND_ADMIN_DIR}'. UI não será servida.")
     print(f"          Caminho base do projeto detectado: {BASE_DIR}")
 
+app.add_middleware(CORSMiddleware) 
+app.add_middleware(ApiLoggingMiddleware)
 app.include_router(auth_router.router, prefix=settings.API_V1_STR)
 app.include_router(admin_router.router, prefix=settings.API_V1_STR)
 app.include_router(admin_panel_router, prefix=settings.API_V1_STR)
