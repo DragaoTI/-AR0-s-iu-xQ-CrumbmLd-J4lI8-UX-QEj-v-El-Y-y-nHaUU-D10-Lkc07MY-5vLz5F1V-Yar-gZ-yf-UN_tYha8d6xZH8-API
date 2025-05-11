@@ -31,16 +31,33 @@ class AdminService:
             print(f"Erro ao buscar admin por ID {admin_id}: {e}")
             return None
 
+    # Em app/services/admin_service.py
     async def get_admin_by_username(self, username: str) -> Optional[Administrator]:
-        if not self.db: return None
-        try:
-            response = self.db.table("administrators").select("*").eq("username", username).maybe_single().execute()
-            if response.data:
-                return Administrator(**response.data)
-            # Se não encontrar, response.data será None ou lista vazia, Pydantic falhará ou retornará None
+        if not self.db:
+            print("DEBUG_GET_ADMIN: self.db é None, retornando None.")
             return None
+        print(f"DEBUG_GET_ADMIN: Tentando buscar admin '{username}'...")
+        try:
+            # TESTE: Tentar selecionar apenas o ID, e não usar maybe_single() por enquanto
+            response = self.db.table("administrators").select("id, username, password_hash, client_hwid_identifier_hash, status, last_login_at, created_at, updated_at").eq("username", username).limit(1).execute()
+            
+            print(f"DEBUG_GET_ADMIN: Resposta bruta do Supabase: {response}") # LOG IMPORTANTE
+            
+            if response and hasattr(response, 'data'): # Verifica se response e response.data existem
+                if response.data and len(response.data) > 0:
+                    print(f"DEBUG_GET_ADMIN: Dados encontrados para '{username}': {response.data[0]}")
+                    return Administrator(**response.data[0])
+                else:
+                    print(f"DEBUG_GET_ADMIN: Nenhum dado encontrado para '{username}' (response.data está vazio).")
+                    return None
+            else:
+                # Se response for None ou não tiver 'data', isso é um problema sério com a chamada ao Supabase
+                print(f"ERRO_GET_ADMIN: Objeto de resposta do Supabase inválido ou None para '{username}'. Response: {response}")
+                return None
         except Exception as e:
-            print(f"Erro ao buscar admin por username {username}: {e}")
+            print(f"EXCEÇÃO em get_admin_by_username para '{username}': {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     async def create_admin(self, admin_data: AdminCreateSchema) -> Optional[Administrator]:
