@@ -12,7 +12,7 @@ import uuid
 
 # CUIDADO: O nome 'admin_router' já existe. Use um nome diferente.
 admin_panel_router = APIRouter(
-    prefix=/admin-panel", # Prefixo para todas as rotas do painel
+    prefix="/admin-panel", # Prefixo para todas as rotas do painel
     tags=["Admin Panel"]
 )
 
