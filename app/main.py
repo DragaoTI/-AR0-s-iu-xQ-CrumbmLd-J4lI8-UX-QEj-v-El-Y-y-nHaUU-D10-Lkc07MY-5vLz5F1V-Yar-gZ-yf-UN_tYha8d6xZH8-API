@@ -14,6 +14,7 @@ from slowapi import _rate_limit_exceeded_handler
 from contextlib import asynccontextmanager
 from app.auth.dependencies import get_current_active_user
 from app.models.user import User as UserModel
+from app.core.logging_middleware import ApiLoggingMiddleware
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_ADMIN_DIR = BASE_DIR / "admin_frontend"
