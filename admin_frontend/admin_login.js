@@ -1,113 +1,179 @@
 // admin_frontend/admin_login.js
 
-// API_BASE_URL, TOKEN_STORAGE_KEY, TOKEN_TYPE_STORAGE_KEY, FP_OPTIONS
-// são definidos em admin_app_config.js e já devem estar carregados.
+// Configurações globais (API_BASE_URL, etc.) são esperadas de admin_app_config.js
+
+let fingerprintJsAgent = null;
+let clientFingerprintValue = 'not-yet-generated'; // Valor inicial
+
+// Chamado pelo onload do script FingerprintJS
+function onFingerprintJsLoaded() {
+    logDebug('FingerprintJS CDN script carregado com sucesso.');
+    initializeFingerprintAgent();
+}
+
+// Chamado pelo onerror do script FingerprintJS
+function onFingerprintJsError() {
+    console.error('Falha ao carregar FingerprintJS CDN script.');
+    showMessageOnLogin('Falha crítica ao carregar componente de identificação. O login seguro não pode prosseguir.', true);
+    const loginButton = document.getElementById('loginButton');
+    if (loginButton) loginButton.disabled = true; // Desabilita login se FPJS falhar
+    clientFingerprintValue = 'fpjs-load-error';
+    const clientFingerprintInput = document.getElementById('clientFingerprint');
+    if (clientFingerprintInput) clientFingerprintInput.value = clientFingerprintValue;
+}
+
+async function initializeFingerprintAgent() {
+    if (typeof FingerprintJS === 'undefined') {
+        console.error('FingerprintJS global não está definido, mesmo após o evento onload.');
+        onFingerprintJsError(); // Trata como erro de carregamento
+        return;
+    }
+    try {
+        fingerprintJsAgent = await FingerprintJS.load(FP_JS_LOAD_OPTIONS);
+        logDebug('FingerprintJS Agent inicializado.');
+        await updateClientFingerprintInput(); // Tenta preencher o input imediatamente
+    } catch (error) {
+        console.error("Erro ao inicializar FingerprintJS Agent:", error);
+        showMessageOnLogin('Erro ao inicializar componente de identificação.', true);
+        clientFingerprintValue = 'fpjs-init-error';
+        const clientFingerprintInput = document.getElementById('clientFingerprint');
+        if (clientFingerprintInput) clientFingerprintInput.value = clientFingerprintValue;
+    }
+}
+
+async function getClientFingerprint() {
+    if (!fingerprintJsAgent) {
+        logDebug('FingerprintJS Agent não está pronto, tentando inicializar...');
+        await initializeFingerprintAgent(); // Tenta inicializar se ainda não estiver
+        if (!fingerprintJsAgent) { // Se ainda falhar
+            console.error('Não foi possível obter o fingerprint: Agent não inicializado.');
+            return 'fpjs-agent-unavailable-' + Date.now(); // Fallback
+        }
+    }
+    try {
+        const result = await fingerprintJsAgent.get(FP_JS_GET_OPTIONS);
+        logDebug("FingerprintJS Visitor ID:", result.visitorId);
+        return result.visitorId;
+    } catch (error) {
+        console.error("Erro ao obter FingerprintJS Visitor ID:", error);
+        return 'fpjs-get-error-' + Date.now(); // Fallback
+    }
+}
+
+async function updateClientFingerprintInput() {
+    const clientFingerprintInput = document.getElementById('clientFingerprint');
+    if (clientFingerprintInput) {
+        clientFingerprintValue = await getClientFingerprint();
+        clientFingerprintInput.value = clientFingerprintValue;
+        logDebug('Input clientFingerprint atualizado com:', clientFingerprintValue);
+    } else {
+        console.error("Elemento clientFingerprint não encontrado no DOM para atualização.");
+    }
+}
+
+function showMessageOnLogin(message, isError = false) {
+    const loginMessageElement = document.getElementById('loginMessage');
+    if (!loginMessageElement) return;
+    loginMessageElement.textContent = message;
+    loginMessageElement.className = 'message-area ' + (isError ? 'error-message' : 'success-message');
+    loginMessageElement.style.display = message ? 'block' : 'none';
+    
+    // Limpa a mensagem após um tempo se não for um erro crítico que impede o login
+    if (message && !isError) { // Limpa apenas mensagens de sucesso ou informativas não críticas
+        setTimeout(() => {
+            if (loginMessageElement.textContent === message) { // Só limpa se for a mesma mensagem
+                 loginMessageElement.style.display = 'none';
+                 loginMessageElement.textContent = '';
+            }
+        }, MESSAGE_TIMEOUT_DURATION);
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
-    const loginMessageElement = document.getElementById('loginMessage');
     const loginButton = document.getElementById('loginButton');
-    const clientHwidIdentifierInput = document.getElementById('clientHwidIdentifier');
-
-    function showMessage(message, isError = false) {
-        if (!loginMessageElement) return;
-        loginMessageElement.textContent = message;
-        loginMessageElement.className = 'message-area ' + (isError ? 'error-message' : 'success-message');
-        loginMessageElement.style.display = message ? 'block' : 'none';
-    }
-
-    async function getClientIdentifier() {
-        if (typeof FingerprintJS === 'undefined') {
-            console.warn('FingerprintJS não está carregado. Usando um identificador de fallback.');
-            // Fallback muito simples (NÃO SEGURO PARA PRODUÇÃO COMO "HWID")
-            return 'fallback|' + navigator.userAgent + '|' + (Math.random().toString(36) + Date.now().toString(36)).substring(2, 18);
-        }
-        try {
-            // Inicializa o FingerprintJS com as opções de config
-            const fpAgent = await FingerprintJS.load(FP_OPTIONS);
-            const result = await fpAgent.get();
-            // console.log("FingerprintJS Visitor ID:", result.visitorId);
-            return result.visitorId; // Este é o identificador que será enviado
-        } catch (error) {
-            console.error("Erro ao obter o FingerprintJS Visitor ID:", error);
-            showMessage('Erro ao obter identificador do dispositivo. O login pode não funcionar como esperado.', true);
-            return 'error-generating-fp-' + (Math.random().toString(36) + Date.now().toString(36)).substring(2, 10);
-        }
-    }
-
-    if (clientHwidIdentifierInput) {
-        getClientIdentifier().then(identifier => {
-            clientHwidIdentifierInput.value = identifier;
-        }).catch(err => {
-            console.error("Falha crítica ao obter identificador do cliente:", err);
-            clientHwidIdentifierInput.value = "unavailable_hwid"; // Valor que indica falha
-            showMessage("Não foi possível obter o identificador do dispositivo. Funcionalidade de HWID pode estar comprometida.", true);
-        });
-    } else {
-        console.error("Elemento clientHwidIdentifier não encontrado no DOM.");
-    }
+    
+    // O FingerprintJS começa a carregar devido ao 'async' no script tag.
+    // onFingerprintJsLoaded() e initializeFingerprintAgent() serão chamados quando estiver pronto.
+    // Se o script falhar, onFingerprintJsError() será chamado.
 
     if (loginForm && loginButton) {
         loginForm.addEventListener('submit', async function(event) {
             event.preventDefault();
-            showMessage(''); // Limpa mensagens anteriores
+            showMessageOnLogin(''); // Limpa mensagens anteriores
             loginButton.disabled = true;
-            loginButton.textContent = 'Entrando...';
+            loginButton.textContent = 'Verificando...';
 
             const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value; // Senhas não devem ter trim
-            const client_hwid_identifier = clientHwidIdentifierInput.value;
+            const password = document.getElementById('password').value;
+            
+            // Certifica-se de que temos o valor mais recente do fingerprint
+            // Pode ser redundante se o updateClientFingerprintInput já rodou, mas garante
+            const currentFingerprint = await getClientFingerprint();
+            const clientFingerprintInput = document.getElementById('clientFingerprint');
+            if (clientFingerprintInput) clientFingerprintInput.value = currentFingerprint;
+
 
             if (!username || !password) {
-                showMessage('Usuário e senha são obrigatórios.', true);
+                showMessageOnLogin('Usuário e senha são obrigatórios.', true);
                 loginButton.disabled = false;
                 loginButton.textContent = 'Entrar';
                 return;
             }
-            if (!client_hwid_identifier || client_hwid_identifier === "unavailable_hwid") {
-                showMessage('Identificador do dispositivo não pôde ser obtido. Tente recarregar a página ou contate o suporte.', true);
+            if (!currentFingerprint || currentFingerprint.startsWith('fpjs-') || currentFingerprint.startsWith('unavailable_')) {
+                showMessageOnLogin('Não foi possível obter um identificador de dispositivo válido. O login não pode prosseguir por razões de segurança.', true);
                 loginButton.disabled = false;
                 loginButton.textContent = 'Entrar';
                 return;
             }
+
+            logDebug('Enviando para login:', { username, client_fingerprint: currentFingerprint });
 
             try {
                 const response = await fetch(`${API_BASE_URL}/admin-panel/auth/token`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        // 'X-Requested-With': 'XMLHttpRequest' // Pode ajudar com algumas proteções CSRF
+                        // 'Accept': 'application/json' // Boa prática
                     },
-                    body: JSON.stringify({ username, password, client_hwid_identifier }),
+                    body: JSON.stringify({ 
+                        username, 
+                        password, 
+                        client_hwid_identifier: currentFingerprint // Envia o fingerprint como client_hwid_identifier
+                    }),
                 });
 
-                const data = await response.json(); // Tenta parsear JSON mesmo em erro para pegar o `detail`
+                const data = await response.json();
 
                 if (!response.ok) {
-                    // `data.detail` é o padrão do FastAPI para mensagens de erro em HTTPExceptions
-                    showMessage(data.detail || `Erro ${response.status}: Falha no login. Verifique suas credenciais e o identificador do dispositivo.`, true);
+                    const errorDetail = data.detail || `Erro ${response.status}. Verifique suas credenciais ou o identificador do dispositivo.`;
+                    showMessageOnLogin(errorDetail, true);
+                    logDebug('Falha no login, resposta da API:', data);
                 } else if (data.access_token) {
                     sessionStorage.setItem(TOKEN_STORAGE_KEY, data.access_token);
                     sessionStorage.setItem(TOKEN_TYPE_STORAGE_KEY, data.token_type || 'Bearer');
                     
-                    showMessage('Login bem-sucedido! Redirecionando...', false);
-                    // Adiciona um pequeno delay para o usuário ver a mensagem de sucesso
+                    showMessageOnLogin('Login bem-sucedido! Redirecionando para o painel...', false);
                     setTimeout(() => {
                         window.location.href = 'admin_dashboard.html';
-                    }, 1000);
+                    }, REDIRECT_DELAY);
                 } else {
-                    showMessage('Resposta inesperada do servidor após o login.', true);
+                    showMessageOnLogin('Resposta inesperada do servidor. Token não recebido.', true);
+                    logDebug('Resposta inesperada, sem token:', data);
                 }
             } catch (error) {
                 console.error('Erro na requisição de login:', error);
-                showMessage('Ocorreu um erro de rede ou o servidor está indisponível. Tente novamente mais tarde.', true);
+                showMessageOnLogin('Erro de comunicação com o servidor. Verifique sua conexão e tente novamente.', true);
             } finally {
-                loginButton.disabled = false;
-                loginButton.textContent = 'Entrar';
+                // Reabilita o botão apenas se não houver redirecionamento pendente
+                if (window.location.href.endsWith('admin_login.html')) { // Checagem simples
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Entrar';
+                }
             }
         });
     } else {
-        if (!loginForm) console.error("Formulário de login não encontrado.");
-        if (!loginButton) console.error("Botão de login não encontrado.");
+        console.error("Formulário de login ou botão não encontrado no DOM.");
     }
 });
