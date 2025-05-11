@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (message && autoClear) {
             setTimeout(() => {
-                if (dashboardMessageElement.textContent === message) { // Só limpa se for a mesma mensagem
+                if (dashboardMessageElement.textContent === message) {
                     dashboardMessageElement.style.display = 'none';
                     dashboardMessageElement.textContent = '';
                 }
@@ -87,11 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Seção Gerenciar Administradores ---
     function renderManageAdminsSection(admins) {
-        // (Código da sua função renderManageAdminsSection da resposta anterior)
-        // ... (cole aqui o código completo de renderManageAdminsSection, renderAdminForm, 
-        //      handleAdminUpsertSubmit, e handleDashboardMainActions para 'edit-admin')
-        // Certifique-se que ela chama renderAdminForm('create') no final
-        // e adiciona o listener para handleDashboardMainActions.
         let html = '<h3>Gerenciar Administradores</h3>';
         html += '<div class="admin-list">';
         if (admins && Array.isArray(admins)) {
@@ -120,12 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
         html += '</div>';
         html += `<div class="form-section" id="adminFormContainer"></div>`;
         if (mainDashboardContentElement) mainDashboardContentElement.innerHTML = html;
-        renderAdminForm('create');
+        renderAdminForm('create'); // Renderiza o formulário de criação por padrão
     }
     
     function renderAdminForm(mode = 'create', adminData = {}) {
-        // (Código da sua função renderAdminForm da resposta anterior)
-        // ... (cole aqui)
         const formContainer = document.getElementById('adminFormContainer');
         if (!formContainer) return;
 
@@ -140,11 +133,11 @@ document.addEventListener('DOMContentLoaded', () => {
         formHtml += `<form id="adminUpsertForm" data-mode="${mode}" data-id="${isEditMode ? adminData.id : ''}" novalidate>`;
         formHtml += `<div class="form-group">
                         <label for="adminUsername">Username:</label>
-                        <input type="text" id="adminUsername" value="${isEditMode ? adminData.username : ''}" placeholder="Pelo menos 3 caracteres" required>
+                        <input type="text" id="adminUsername" value="${isEditMode ? adminData.username : ''}" placeholder="Pelo menos 3 caracteres" required autocomplete="off">
                      </div>`;
         formHtml += `<div class="form-group">
                         <label for="adminPassword">${isEditMode ? 'Nova Senha (deixe em branco para não alterar)' : 'Senha:'}</label>
-                        <input type="password" id="adminPassword" placeholder="Pelo menos 8 caracteres" ${!isEditMode ? 'required' : ''}>
+                        <input type="password" id="adminPassword" placeholder="Pelo menos 8 caracteres" ${!isEditMode ? 'required' : ''} autocomplete="new-password">
                      </div>`;
         if (isEditMode) {
             formHtml += `<div class="form-group">
@@ -157,12 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         formHtml += `<div class="form-group">
                         <label for="adminClientFingerprint">${hwidNote}:</label>
-                        <input type="text" id="adminClientFingerprint" placeholder="Gerado pelo navegador ou 'CLEAR_HWID' para limpar">
+                        <input type="text" id="adminClientFingerprint" placeholder="Gerado pelo navegador ou 'CLEAR_HWID' para limpar" autocomplete="off">
                         <small>Ao editar: preencher substitui; deixar em branco mantém; 'CLEAR_HWID' remove.</small>
                      </div>`;
         formHtml += `<button type="submit" id="adminUpsertButton">${submitButtonText}</button>`;
         if (isEditMode) {
-            formHtml += `<button type="button" id="cancelEditAdminButton" class="button" style="margin-left: 10px; background-color: #7f8c8d;">Cancelar Edição</button>`;
+            formHtml += `<button type="button" id="cancelEditAdminButton" class="button" style="margin-left: 10px; background-color: #7f8c8d;">Cancelar</button>`;
         }
         formHtml += `</form>`;
         
@@ -175,14 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isEditMode) {
             const cancelButton = document.getElementById('cancelEditAdminButton');
             if (cancelButton) {
-                cancelButton.addEventListener('click', () => renderAdminForm('create'));
+                cancelButton.addEventListener('click', () => renderAdminForm('create')); // Volta para o form de criação
             }
         }
     }
 
     async function handleAdminUpsertSubmit(event) {
-        // (Código da sua função handleAdminUpsertSubmit da resposta anterior)
-        // ... (cole aqui)
         event.preventDefault();
         const form = event.target;
         const mode = form.dataset.mode;
@@ -195,15 +186,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const client_fingerprint_input = document.getElementById('adminClientFingerprint').value.trim();
         
         const payload = { username };
-        if (password) payload.password = password;
+        if (password) { // Envia senha apenas se preenchida (para criação ou para alteração)
+            if (password.length < 8 && mode === 'create') { // Validação mínima para nova senha
+                showDashboardMessage('A nova senha deve ter pelo menos 8 caracteres.', true);
+                if (upsertButton) upsertButton.disabled = false;
+                return;
+            }
+             if (password.length > 0 && password.length < 8 && mode === 'edit') { // Validação mínima para nova senha na edição
+                showDashboardMessage('Se for alterar, a nova senha deve ter pelo menos 8 caracteres.', true);
+                if (upsertButton) upsertButton.disabled = false;
+                return;
+            }
+            payload.password = password;
+        } else if (mode === 'create') { // Senha é obrigatória para criar
+             showDashboardMessage('Senha é obrigatória para criar um novo administrador.', true);
+             if (upsertButton) upsertButton.disabled = false;
+             return;
+        }
         
+        // Lógica para client_hwid_identifier
         if (client_fingerprint_input.toUpperCase() === "CLEAR_HWID") {
             payload.client_hwid_identifier = null; 
         } else if (client_fingerprint_input) {
             payload.client_hwid_identifier = client_fingerprint_input;
-        } else if (mode === 'create') {
+        } else if (mode === 'create') { // Para criação, se em branco, pode ser null.
             payload.client_hwid_identifier = null;
         }
+        // Se em branco no modo de edição, não envia o campo client_hwid_identifier para não sobrescrever.
 
         let shortEndpoint = '/administrators';
         let method = 'POST';
@@ -219,7 +228,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (result && (result.id || result.success)) {
             showDashboardMessage(`Administrador ${mode === 'edit' ? 'atualizado' : 'criado'} com sucesso!`, false);
-            navigateToSection('manageAdmins');
+            navigateToSection('manageAdmins'); // Recarrega a seção
+        } else {
+            // A mensagem de erro específica já deve ter sido mostrada por fetchApi
+            showDashboardMessage(`Falha ao ${mode === 'edit' ? 'atualizar' : 'criar'} administrador. Verifique o console para detalhes.`, true);
         }
         if (upsertButton) upsertButton.disabled = false;
     }
@@ -239,16 +251,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <option value="DELETE">DELETE</option>
                 </select>
                 <button id="applyLogFiltersButton" class="button">Filtrar</button>
-                <button id="clearLogFiltersButton" class="button" style="background-color: #95a5a6;">Limpar Filtros</button>
+                <button id="clearLogFiltersButton" class="button" style="background-color: #95a5a6;">Limpar</button>
             </div>
         `;
-
         html += '<div class="api-log-list" style="max-height: 600px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background-color: #fdfdfd;">';
         if (logs && Array.isArray(logs)) {
             if (logs.length === 0) {
                 html += '<p>Nenhum log encontrado para os filtros aplicados.</p>';
             } else {
-                html += '<ul style="font-family: monospace; font-size: 0.8em; list-style: none; padding:0;">'; // Tamanho de fonte menor para logs
+                html += '<ul style="font-family: monospace; font-size: 0.8em; list-style: none; padding:0;">';
                 logs.forEach(log => {
                     const ts = new Date(log.timestamp).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'medium' });
                     const userDisplay = log.user_id ? `User: ${log.user_id.substring(0,8)}` : (log.admin_id ? `AdmPanel: ${log.admin_id.substring(0,8)}` : 'Anon');
@@ -261,8 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     html += `
                         <li style="border-bottom: 1px dotted #e0e0e0; padding: 6px 2px; margin-bottom: 6px; word-break: break-all;">
-                            <strong class="${statusClass}">[${ts}] ${log.method} ${log.path} ➔ ${log.status_code}</strong> (${log.processing_time_ms?.toFixed(1)}ms)<br>
-                            <small>IP: ${log.client_host} | ${userDisplay} | Tags: [${tagsDisplay}]</small><br>
+                            <strong class="${statusClass}">[${ts}] ${log.method || '?'} ${log.path || '?'} ➔ ${log.status_code || '?'}</strong> (${log.processing_time_ms?.toFixed(1)}ms)<br>
+                            <small>IP: ${log.client_host || '?'} | ${userDisplay} | Tags: [${tagsDisplay}]</small><br>
                             <small title="${log.user_agent || ''}">UA: ${log.user_agent?.substring(0, 60) || 'N/A'}...</small>
                             ${log.error_message ? `<br><small style="color: #c0392b; font-weight: bold;">ErroMsg: ${log.error_message}</small>` : ''}
                         </li>`;
@@ -276,26 +287,25 @@ document.addEventListener('DOMContentLoaded', () => {
         return html;
     }
 
-    async function loadAndRenderApiLogs(filters = { skip: 0, limit: 50 }) { // Adiciona skip/limit padrão
+    async function loadAndRenderApiLogs(filters = { skip: 0, limit: 50 }) {
         if (!mainDashboardContentElement) return;
         mainDashboardContentElement.innerHTML = "<p>Carregando logs da API...</p>";
 
         let queryParams = `?skip=${filters.skip || 0}&limit=${filters.limit || 50}`;
         if (filters.method) queryParams += `&method=${filters.method}`;
-        if (filters.status_code_filter) queryParams += `&status_code_filter=${filters.status_code_filter}`; // Nome do param do backend
+        if (filters.status_code_filter) queryParams += `&status_code_filter=${filters.status_code_filter}`;
         if (filters.path_contains) queryParams += `&path_contains=${encodeURIComponent(filters.path_contains)}`;
         
         const logs = await fetchApi(`/logs/api${queryParams}`);
-        mainDashboardContentElement.innerHTML = renderApiLogsSection(logs); // Passa os logs para a função de renderização
+        mainDashboardContentElement.innerHTML = renderApiLogsSection(logs);
 
-        // Adicionar listeners aos filtros DEPOIS que eles foram renderizados
         document.getElementById('applyLogFiltersButton')?.addEventListener('click', () => {
             const pathFilter = document.getElementById('logFilterPath').value;
             const statusFilter = document.getElementById('logFilterStatus').value;
             const methodFilter = document.getElementById('logFilterMethod').value;
             loadAndRenderApiLogs({ 
                 path_contains: pathFilter, 
-                status_code_filter: statusFilter, // Usa o nome correto do parâmetro
+                status_code_filter: statusFilter, 
                 method: methodFilter 
             });
         });
@@ -303,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('logFilterPath').value = '';
             document.getElementById('logFilterStatus').value = '';
             document.getElementById('logFilterMethod').value = '';
-            loadAndRenderApiLogs(); // Carrega com filtros limpos
+            loadAndRenderApiLogs();
         });
     }
 
@@ -316,20 +326,18 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.dashboard-nav button').forEach(btn => btn.classList.remove('active'));
         document.querySelector(`.dashboard-nav button[data-section="${sectionName}"]`)?.classList.add('active');
 
-
         if (sectionName === 'manageAdmins') {
             const admins = await fetchApi('/administrators');
             renderManageAdminsSection(admins);
         } else if (sectionName === 'apiLogs') {
             await loadAndRenderApiLogs();
-        } else { // overview ou default
+        } else { 
             mainDashboardContentElement.innerHTML = '<h3>Visão Geral</h3><p>Bem-vindo ao painel de administração.</p>';
         }
     }
     
     function handleDashboardMainActions(event) {
         const target = event.target;
-        // Delegação para botões de editar admin
         if (target.classList.contains('edit-admin')) {
             event.preventDefault();
             const adminId = target.dataset.id;
@@ -340,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             id: adminData.id,
                             username: adminData.username,
                             status: adminData.status,
-                            has_hwid: !!adminData.client_hwid_identifier_hash
+                            has_hwid: !!adminData.client_hwid_identifier_hash // Informa se um HWID já está registrado
                         });
                     } else {
                         showDashboardMessage("Não foi possível carregar dados do administrador para edição.", true);
@@ -364,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
-            showDashboardMessage('Saindo do sistema...', false, false); // Não auto-limpar
+            showDashboardMessage('Saindo do sistema...', false, false);
             sessionStorage.removeItem(TOKEN_STORAGE_KEY);
             sessionStorage.removeItem(TOKEN_TYPE_STORAGE_KEY);
             setTimeout(() => { window.location.href = 'admin_login.html'; }, REDIRECT_DELAY / 2);
