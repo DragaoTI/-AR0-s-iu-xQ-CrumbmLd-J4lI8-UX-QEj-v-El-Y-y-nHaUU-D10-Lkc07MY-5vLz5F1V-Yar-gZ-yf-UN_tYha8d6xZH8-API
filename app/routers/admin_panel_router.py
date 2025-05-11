@@ -12,6 +12,7 @@ from app.schemas.admin_schemas import (
 )
 from app.auth.admin_jwt_handler import create_admin_access_token
 from app.auth.admin_dependencies import get_current_admin_user
+from app.schemas.log_schemas import ApiLogResponseSchema
 from app.models.admin import Administrator # O modelo Pydantic para o admin
 from app.core.config import settings # Para o prefixo API_V1_STR
 
