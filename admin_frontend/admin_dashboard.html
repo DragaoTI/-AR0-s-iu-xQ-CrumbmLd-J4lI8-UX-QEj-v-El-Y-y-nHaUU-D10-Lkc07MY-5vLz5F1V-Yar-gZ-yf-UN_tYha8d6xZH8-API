@@ -6,8 +6,8 @@
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self'; 
                    script-src 'self'; 
-                   style-src 'self' 'unsafe-inline'; 
-                   connect-src 'self' https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com;
+                   style-src 'self' 'unsafe-inline'; /* Tente remover 'unsafe-inline' se possível */
+                   connect-src 'self' https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com; /* Substitua pela URL da sua API */
                    img-src 'self' data:;
                    font-src 'self';
                    form-action 'none'; 
@@ -23,7 +23,7 @@
 
     <title>Admin Dashboard - Painel Seguro</title>
     <link rel="stylesheet" href="admin_style.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Certifique-se que favicon.ico existe -->
 </head>
 <body>
     <div class="dashboard-container">
@@ -36,7 +36,9 @@
         </header>
         
         <nav class="dashboard-nav">
+            <button data-section="overview" class="button">Visão Geral</button>
             <button data-section="manageAdmins" class="button">Gerenciar Admins</button>
+            <button data-section="apiLogs" class="button">Logs da API</button>
             <!-- Adicionar mais botões de navegação aqui conforme necessário -->
         </nav>
 
