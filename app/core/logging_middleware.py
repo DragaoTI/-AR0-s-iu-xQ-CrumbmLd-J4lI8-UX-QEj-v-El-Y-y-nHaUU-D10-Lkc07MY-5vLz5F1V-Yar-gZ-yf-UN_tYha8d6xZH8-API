@@ -2,7 +2,8 @@
 import time
 import json
 from typing import Optional, Any, Dict
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseCallNext
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp, Receive, Scope, Send, RequestResponseCallNext
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import ASGIApp
