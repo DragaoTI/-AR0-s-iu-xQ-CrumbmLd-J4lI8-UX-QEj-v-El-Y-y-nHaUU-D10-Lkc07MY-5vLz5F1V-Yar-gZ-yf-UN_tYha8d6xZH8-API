@@ -4,33 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 
-        Content Security Policy (CSP) - EXTREMAMENTE IMPORTANTE E DEVE SER AJUSTADA
-        Esta é uma política mais restritiva. Teste exaustivamente.
+        Content Security Policy (CSP) - AJUSTADA E LIMPA
+        Certifique-se de que não há caracteres estranhos ou comentários dentro do atributo "content".
+        Substitua 'https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com' pela URL EXATA da sua API.
     -->
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self';
-                   script-src 'self' https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js; 
-                   style-src 'self'; /* Idealmente, remova 'unsafe-inline' de estilos também */
-                   connect-src 'self' https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com; /* APENAS sua API de produção */
-                   img-src 'self' data:; /* Permite imagens embutidas e da mesma origem */
-                   font-src 'self'; /* Se usar fontes customizadas locais */
-                   form-action 'self'; /* Embora usemos JS, é uma boa prática */
-                   frame-ancestors 'none'; /* Proteção contra clickjacking */
+                   script-src 'self' https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js;
+                   style-src 'self';
+                   connect-src 'self' https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com;
+                   img-src 'self' data:;
+                   font-src 'self';
+                   form-action 'self';
+                   frame-ancestors 'none';
                    base-uri 'self';
-                   object-src 'none'; /* Desabilita plugins como Flash */
-                   manifest-src 'self'; /* Se você tiver um manifest */
-                   worker-src 'none'; /* Se não usar web workers */
+                   object-src 'none';
+                   manifest-src 'self';
+                   worker-src 'none';
                    upgrade-insecure-requests;">
-    <!-- Headers de segurança adicionais (podem ser configurados no servidor também) -->
+    
+    <!-- X-Content-Type-Options é melhor configurado via header HTTP pelo servidor, mas pode ser deixado aqui por redundância -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY"> 
-    <!-- Referrer-Policy pode ajudar a controlar que informação de referer é enviada -->
+    <!-- X-Frame-Options foi removido daqui, pois só funciona como header HTTP. frame-ancestors na CSP já cobre. -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
     <title>Admin Login - Painel Seguro</title>
     <link rel="stylesheet" href="admin_style.css">
-    <!-- Favicon (coloque seu favicon.ico na raiz ou ajuste o path) -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Assumindo favicon.ico na mesma pasta -->
 </head>
 <body>
     <div class="login-container">
@@ -44,7 +44,6 @@
                 <label for="password">Senha:</label>
                 <input type="password" id="password" name="password" required autocomplete="off">
             </div>
-            <!-- O FingerprintJS Visitor ID será colocado aqui -->
             <input type="hidden" id="clientFingerprint" name="clientFingerprint">
 
             <button type="submit" id="loginButton">Entrar</button>
@@ -52,9 +51,15 @@
         </form>
     </div>
 
-    <!-- FingerprintJS CDN -->
+    <!-- 
+        FingerprintJS CDN Script Tag. 
+        NOTA: O hash de integridade (SRI) é específico para a versão e conteúdo do arquivo.
+        Se o CDN atualizar o arquivo fp.min.js, este hash pode precisar ser atualizado.
+        O valor 'RGoAjUH4gJ40bAD0YPezgdsNOCbBWQlNwdWfA981c/7NgIyqm+TeAelFv346J7UO' foi o que seu navegador calculou.
+        Vamos usá-lo. Se ainda der erro de integridade, o arquivo no CDN pode ter mudado desde o seu último teste.
+    -->
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js" 
-            integrity="sha384-H0KaL6w5wlZb4wzXnK5yZJ0LsqJ0iHZO2yP4GvtGyL7N772mRtADftfDE1XoF8yP" 
+            integrity="sha384-RGoAjUH4gJ40bAD0YPezgdsNOCbBWQlNwdWfA981c/7NgIyqm+TeAelFv346J7UO" 
             crossorigin="anonymous"
             async 
             onload="onFingerprintJsLoaded()" 
