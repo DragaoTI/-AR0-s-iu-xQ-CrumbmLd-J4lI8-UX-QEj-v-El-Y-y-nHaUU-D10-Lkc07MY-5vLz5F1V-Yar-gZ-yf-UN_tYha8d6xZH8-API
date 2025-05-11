@@ -10,6 +10,7 @@ from app.schemas.admin_schemas import AdminTokenData
 # from app.services import admin_service_instance # Assumindo que você criou a instância
 from app.models.admin import Administrator
 from app.core.config import settings # Para o tokenUrl
+from app.services import admin_service_instance
 
 
 # Este é o URL onde o admin faz login para obter o token
