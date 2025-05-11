@@ -247,3 +247,69 @@ button:disabled, .button:disabled {
 .admin-list .actions button.delete-admin:hover {
     color: #c0392b;
 }
+
+/* admin_frontend/admin_style.css */
+
+/* ... (seus estilos existentes) ... */
+
+.log-filters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap; /* Para responsividade dos filtros */
+    padding: 15px;
+    background-color: #f8f9fa; /* Fundo sutil para a área de filtros */
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.log-filters input[type="text"],
+.log-filters input[type="number"],
+.log-filters select {
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.log-filters input[type="text"] {
+    flex-grow: 1; /* Campo de path pode ser maior */
+    min-width: 150px;
+}
+.log-filters input[type="number"] {
+    width: 100px;
+}
+.log-filters select {
+    min-width: 130px;
+}
+
+.api-log-list ul {
+    font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada para logs */
+    font-size: 0.85em;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.api-log-list li {
+    border-bottom: 1px dotted #e0e0e0;
+    padding: 8px 4px; /* Mais padding */
+    margin-bottom: 8px;
+    word-break: break-all; /* Evita que linhas longas quebrem o layout */
+    line-height: 1.4;
+}
+.api-log-list li small {
+    color: #555;
+    display: block; /* Para que o <br> funcione bem */
+    margin-top: 3px;
+}
+.api-log-list li strong.log-status-success { color: #28a745; } /* Verde para sucesso */
+.api-log-list li strong.log-status-redirect { color: #17a2b8; } /* Azul/ciano para redirect */
+.api-log-list li strong.log-status-client-error { color: #ffc107; } /* Amarelo para erro do cliente */
+.api-log-list li strong.log-status-server-error { color: #dc3545; } /* Vermelho para erro do servidor */
+
+
+.dashboard-nav button.active { /* Estilo para o botão de navegação ativo */
+    background-color: #2980b9;
+    font-weight: bold;
+}
