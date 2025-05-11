@@ -1,0 +1,200 @@
+/* admin_frontend/admin_style.css */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #eef2f5; /* Cor de fundo mais suave */
+    margin: 0;
+    color: #333;
+    line-height: 1.6;
+}
+
+.login-container, .dashboard-container {
+    background-color: #ffffff;
+    padding: 35px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.dashboard-container {
+    max-width: 900px;
+    text-align: left;
+}
+
+h2, h3, h4 {
+    color: #2c3e50; /* Tom de azul escuro */
+    margin-top: 0;
+}
+
+h2 {
+    margin-bottom: 30px;
+    font-size: 1.8em;
+}
+h3 {
+    margin-bottom: 15px;
+    font-size: 1.4em;
+    border-bottom: 2px solid #ecf0f1; /* Divisor sutil */
+    padding-bottom: 10px;
+}
+h4 {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    color: #34495e;
+}
+
+
+.form-group {
+    margin-bottom: 22px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555f6b;
+    font-weight: 600; /* Um pouco mais de peso */
+    font-size: 0.95em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+#createAdminForm input[type="text"],
+#createAdminForm input[type="password"] {
+    width: 100%; /* Ocupa toda a largura disponível */
+    padding: 12px 15px;
+    border: 1px solid #bdc3c7; /* Borda mais definida */
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="password"]:focus,
+#createAdminForm input[type="text"]:focus,
+#createAdminForm input[type="password"]:focus {
+    border-color: #3498db; /* Cor de destaque no foco */
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    outline: none;
+}
+
+
+button[type="submit"], .dashboard-container button {
+    background-color: #3498db; /* Azul mais vibrante */
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.05em;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    width: 100%; /* Botão de login ocupa largura total */
+    margin-top: 10px; /* Espaço acima do botão */
+}
+.dashboard-container button {
+    width: auto; /* Botões no dashboard não precisam ser full-width */
+    padding: 10px 18px;
+    font-size: 0.95em;
+}
+
+
+button[type="submit"]:hover, .dashboard-container button:hover {
+    background-color: #2980b9; /* Azul mais escuro no hover */
+}
+button[type="submit"]:active, .dashboard-container button:active {
+    transform: translateY(1px); /* Efeito de clique sutil */
+}
+button:disabled {
+    background-color: #a3cde7;
+    cursor: not-allowed;
+}
+
+
+.message-area {
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    text-align: center;
+    display: none; /* Escondido por padrão */
+    border-width: 1px;
+    border-style: solid;
+}
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+    display: block; /* Mostrar quando tiver conteúdo */
+}
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+    display: block; /* Mostrar quando tiver conteúdo */
+}
+
+/* Dashboard específico */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+#loggedInUser {
+    margin-right: 20px;
+    font-style: italic;
+    color: #555f6b;
+}
+
+.dashboard-content ul {
+    list-style: none;
+    padding: 0;
+}
+.dashboard-content li {
+    background-color: #f9fafb;
+    border: 1px solid #e1e5e8;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.dashboard-content li .actions a {
+    margin-left: 10px;
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+}
+.dashboard-content li .actions a:hover {
+    text-decoration: underline;
+    color: #2980b9;
+}
+
+#createAdminForm {
+    background-color: #f9fafb;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e1e5e8;
+    margin-top: 15px;
+}
+#createAdminForm input {
+    margin-bottom: 12px;
+}
+#createAdminForm button {
+    width: auto; /* Botão de criar admin não full-width */
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
