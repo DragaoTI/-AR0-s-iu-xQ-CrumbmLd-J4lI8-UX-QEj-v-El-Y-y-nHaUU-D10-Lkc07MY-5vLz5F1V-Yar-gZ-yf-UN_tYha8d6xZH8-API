@@ -16,7 +16,7 @@ const MESSAGE_TIMEOUT_DURATION = 5000;
 const REDIRECT_DELAY = 1500;
 
 // Mude para true para ver logs detalhados do frontend no console do navegador
-const FRONTEND_DEBUG_MODE = false; 
+const FRONTEND_DEBUG_MODE = true; 
 
 function logDebug(...args) {
     if (FRONTEND_DEBUG_MODE) {
