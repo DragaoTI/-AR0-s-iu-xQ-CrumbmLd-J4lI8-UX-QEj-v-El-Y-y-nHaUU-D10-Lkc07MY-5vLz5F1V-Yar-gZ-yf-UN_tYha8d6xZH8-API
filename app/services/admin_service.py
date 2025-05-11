@@ -64,16 +64,16 @@ class AdminService:
         # Verificar HWID (identificador do cliente)
         # Se o admin não tiver um HWID registrado, este login pode ser o primeiro para registrar.
         # Ou, se for obrigatório, falhar aqui. Vamos assumir que se estiver registrado, deve corresponder.
- #       hashed_client_hwid = hash_identifier(client_hwid_identifier)
- #       if admin.client_hwid_identifier_hash and admin.client_hwid_identifier_hash != hashed_client_hwid:
- #           print(f"Falha na verificação de HWID para admin: {username}. Esperado: {admin.client_hwid_identifier_hash}, Recebido (hash): {hashed_client_hwid}")
- #           return None # HWID não corresponde
- #
- #       # Se o admin não tem HWID registrado e este é o primeiro login válido, você pode querer registrá-lo:
- #       if not admin.client_hwid_identifier_hash and hashed_client_hwid:
- #           # print(f"Registrando HWID para admin {username} no primeiro login válido.")
- #          await self.update_admin_hwid(admin.id, hashed_client_hwid)
- #           admin.client_hwid_identifier_hash = hashed_client_hwid # Atualiza o objeto em memória
+        hashed_client_hwid = hash_identifier(client_hwid_identifier)
+        if admin.client_hwid_identifier_hash and admin.client_hwid_identifier_hash != hashed_client_hwid:
+            print(f"Falha na verificação de HWID para admin: {username}. Esperado: {admin.client_hwid_identifier_hash}, Recebido (hash): {hashed_client_hwid}")
+            return None # HWID não corresponde
+ 
+        # Se o admin não tem HWID registrado e este é o primeiro login válido, você pode querer registrá-lo:
+        if not admin.client_hwid_identifier_hash and hashed_client_hwid:
+            # print(f"Registrando HWID para admin {username} no primeiro login válido.")
+           await self.update_admin_hwid(admin.id, hashed_client_hwid)
+            admin.client_hwid_identifier_hash = hashed_client_hwid # Atualiza o objeto em memória
 
         return admin # Autenticação bem-sucedida
 
