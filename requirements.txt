@@ -1,6 +1,5 @@
 fastapi
 uvicorn[standard]
-python-multipart
 pydantic
 pydantic-settings
 python-jose[cryptography] # Para JWT com RS256
@@ -10,3 +9,4 @@ httpx # Para chamadas HTTP assíncronas (GeoIP)
 slowapi # Para rate limiting
 python-dotenv
 email-validator # Dependência do Pydantic para EmailStr
+python-multipart
