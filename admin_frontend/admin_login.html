@@ -4,46 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 
-        Content Security Policy (CSP) - AJUSTE PARA PRODUÇÃO!
-        Esta política é um ponto de partida.
+        Content Security Policy (CSP) - EXTREMAMENTE IMPORTANTE E DEVE SER AJUSTADA
+        Esta é uma política mais restritiva. Teste exaustivamente.
     -->
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self';
                    script-src 'self' https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js; 
-                   style-src 'self' 'unsafe-inline'; /* Tente remover 'unsafe-inline' movendo todo CSS para arquivos */
-                   connect-src 'self' http://localhost:8000 https://sua-api-no-render.onrender.com; /* Permita localhost E sua URL de produção */
-                   img-src 'self' data:;
-                   font-src 'self';
-                   form-action 'self'; /* Permite que o form submeta para a mesma origem (embora usemos JS) */
-                   frame-ancestors 'none'; /* Previne clickjacking */
+                   style-src 'self'; /* Idealmente, remova 'unsafe-inline' de estilos também */
+                   connect-src 'self' https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com; /* APENAS sua API de produção */
+                   img-src 'self' data:; /* Permite imagens embutidas e da mesma origem */
+                   font-src 'self'; /* Se usar fontes customizadas locais */
+                   form-action 'self'; /* Embora usemos JS, é uma boa prática */
+                   frame-ancestors 'none'; /* Proteção contra clickjacking */
                    base-uri 'self';
-                   object-src 'none'; /* Bloqueia <object>, <embed>, <applet> */
+                   object-src 'none'; /* Desabilita plugins como Flash */
+                   manifest-src 'self'; /* Se você tiver um manifest */
+                   worker-src 'none'; /* Se não usar web workers */
                    upgrade-insecure-requests;">
+    <!-- Headers de segurança adicionais (podem ser configurados no servidor também) -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY"> 
+    <!-- Referrer-Policy pode ajudar a controlar que informação de referer é enviada -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
     <title>Admin Login - Painel Seguro</title>
     <link rel="stylesheet" href="admin_style.css">
+    <!-- Favicon (coloque seu favicon.ico na raiz ou ajuste o path) -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div class="login-container">
-        <h2>Painel de Administração - Login</h2>
-        <form id="loginForm" novalidate> <!-- novalidate para usar nossa validação JS -->
+        <h2>Painel de Administração</h2>
+        <form id="loginForm" novalidate autocomplete="off">
             <div class="form-group">
                 <label for="username">Usuário:</label>
-                <input type="text" id="username" name="username" required autocomplete="username" autofocus>
+                <input type="text" id="username" name="username" required autocomplete="off" autofocus>
             </div>
             <div class="form-group">
                 <label for="password">Senha:</label>
-                <input type="password" id="password" name="password" required autocomplete="current-password">
+                <input type="password" id="password" name="password" required autocomplete="off">
             </div>
-            <!-- O HWID/Client Identifier será preenchido via JavaScript -->
-            <input type="hidden" id="clientHwidIdentifier" name="clientHwidIdentifier">
+            <!-- O FingerprintJS Visitor ID será colocado aqui -->
+            <input type="hidden" id="clientFingerprint" name="clientFingerprint">
 
             <button type="submit" id="loginButton">Entrar</button>
-            <p id="loginMessage" class="message-area"></p>
+            <p id="loginMessage" class="message-area" aria-live="assertive"></p>
         </form>
     </div>
 
-    <!-- Biblioteca FingerprintJS para um identificador de navegador mais robusto -->
-    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js" integrity="sha384-H0KaL6w5wlZb4wzXnK5yZJ0LsqJ0iHZO2yP4GvtGyL7N772mRtADftfDE1XoF8yP" crossorigin="anonymous"></script>
+    <!-- FingerprintJS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js" 
+            integrity="sha384-H0KaL6w5wlZb4wzXnK5yZJ0LsqJ0iHZO2yP4GvtGyL7N772mRtADftfDE1XoF8yP" 
+            crossorigin="anonymous"
+            async 
+            onload="onFingerprintJsLoaded()" 
+            onerror="onFingerprintJsError()"></script>
+    
     <script src="admin_app_config.js"></script>
     <script src="admin_login.js"></script>
 </body>
