@@ -8,6 +8,8 @@ from slowapi import _rate_limit_exceeded_handler # Importação direta do handle
 from contextlib import asynccontextmanager
 from app.auth.dependencies import get_current_active_user # Para a rota protegida
 from app.models.user import User as UserModel # Renomeado para evitar conflito, como você já tinha
+from app.routers import auth_router, admin_router # Seu router de usuário existente e o admin de antes
+from app.routers.admin_panel_router import admin_panel_router # O novo router do painel
 
 # Gerenciador de contexto para inicialização/finalização
 @asynccontextmanager
@@ -48,6 +50,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler) # Usa
 # Routers
 app.include_router(auth_router.router, prefix=settings.API_V1_STR)
 app.include_router(admin_router.router, prefix=settings.API_V1_STR) # Já tem /admin no prefixo do router
+app.include_router(admin_panel_router, prefix=settings.API_V1_STR) # Adiciona o novo router do painel
 
 @app.get("/", tags=["Root"])
 async def read_root():
