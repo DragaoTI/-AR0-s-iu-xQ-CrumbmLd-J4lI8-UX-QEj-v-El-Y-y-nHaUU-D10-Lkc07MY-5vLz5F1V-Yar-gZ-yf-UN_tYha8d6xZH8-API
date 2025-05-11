@@ -8,6 +8,7 @@ from app.auth.admin_jwt_handler import create_admin_access_token
 from app.auth.admin_dependencies import get_current_admin_user
 from app.models.admin import Administrator
 from app.core.config import settings # Para prefixo
+from app.services import admin_service_instance
 import uuid
 
 # CUIDADO: O nome 'admin_router' já existe. Use um nome diferente.
