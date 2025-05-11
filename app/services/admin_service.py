@@ -73,7 +73,7 @@ class AdminService:
         if not admin.client_hwid_identifier_hash and hashed_client_hwid:
             # print(f"Registrando HWID para admin {username} no primeiro login válido.")
            await self.update_admin_hwid(admin.id, hashed_client_hwid)
-            admin.client_hwid_identifier_hash = hashed_client_hwid # Atualiza o objeto em memória
+                admin.client_hwid_identifier_hash = hashed_client_hwid
 
         return admin # Autenticação bem-sucedida
 
