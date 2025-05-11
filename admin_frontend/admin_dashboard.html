@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 
-        Content Security Policy (CSP) - AJUSTADA E LIMPA
-        Certifique-se de que não há caracteres estranhos ou comentários dentro do atributo "content".
-        Substitua 'https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com' pela URL EXATA da sua API.
-    -->
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self'; 
-                   script-src 'self'; /* FingerprintJS não é carregado nesta página, então não precisa do CDN aqui */
-                   style-src 'self'; 
+                   script-src 'self'; 
+                   style-src 'self' 'unsafe-inline'; /* Tente mover todos os estilos para admin_style.css para remover 'unsafe-inline' */
                    connect-src 'self' https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com;
                    img-src 'self' data:;
                    font-src 'self';
@@ -42,7 +37,6 @@
         
         <nav class="dashboard-nav">
             <button data-section="manageAdmins" class="button">Gerenciar Admins</button>
-            <!-- Adicionar mais botões de navegação aqui conforme necessário -->
         </nav>
 
         <main id="mainDashboardContent" class="dashboard-content">
