@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 
-        Content Security Policy (CSP) - AJUSTADA E LIMPA
-        Certifique-se de que não há caracteres estranhos ou comentários dentro do atributo "content".
-        Substitua 'https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com' pela URL EXATA da sua API.
-    -->
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self';
-                   script-src 'self' https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js;
-                   style-src 'self';
+                   script-src 'self' https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js 'unsafe-inline';
+                   style-src 'self' 'unsafe-inline'; /* Tente mover todos os estilos para admin_style.css para remover 'unsafe-inline' */
                    connect-src 'self' https://four3nuihgv7834hgv783h8fvhn2847nrv8h3hn7.onrender.com;
                    img-src 'self' data:;
                    font-src 'self';
@@ -23,14 +18,12 @@
                    worker-src 'none';
                    upgrade-insecure-requests;">
     
-    <!-- X-Content-Type-Options é melhor configurado via header HTTP pelo servidor, mas pode ser deixado aqui por redundância -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <!-- X-Frame-Options foi removido daqui, pois só funciona como header HTTP. frame-ancestors na CSP já cobre. -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
     <title>Admin Login - Painel Seguro</title>
     <link rel="stylesheet" href="admin_style.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Assumindo favicon.ico na mesma pasta -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div class="login-container">
@@ -51,13 +44,6 @@
         </form>
     </div>
 
-    <!-- 
-        FingerprintJS CDN Script Tag. 
-        NOTA: O hash de integridade (SRI) é específico para a versão e conteúdo do arquivo.
-        Se o CDN atualizar o arquivo fp.min.js, este hash pode precisar ser atualizado.
-        O valor 'RGoAjUH4gJ40bAD0YPezgdsNOCbBWQlNwdWfA981c/7NgIyqm+TeAelFv346J7UO' foi o que seu navegador calculou.
-        Vamos usá-lo. Se ainda der erro de integridade, o arquivo no CDN pode ter mudado desde o seu último teste.
-    -->
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js" 
             integrity="sha384-RGoAjUH4gJ40bAD0YPezgdsNOCbBWQlNwdWfA981c/7NgIyqm+TeAelFv346J7UO" 
             crossorigin="anonymous"
