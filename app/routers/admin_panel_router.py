@@ -1,5 +1,5 @@
 # app/routers/admin_panel_router.py
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Query # << Adicionado Query
 from typing import List, Optional
 import uuid
 
@@ -7,19 +7,18 @@ from app.schemas.admin_schemas import (
     AdminLoginSchema, AdminToken, AdminResponseSchema, 
     AdminCreateSchema, AdminUpdateSchema
 )
-from app.schemas.log_schemas import ApiLogResponseSchema # << NOVO IMPORT
+from app.schemas.log_schemas import ApiLogResponseSchema
 from app.auth.admin_jwt_handler import create_admin_access_token
 from app.auth.admin_dependencies import get_current_admin_user
 from app.models.admin import Administrator
 from app.core.config import settings
-from app.services import admin_service_instance, supabase_service # Importar supabase_service para query direta
+from app.services import admin_service_instance, supabase_service
 
 admin_panel_router = APIRouter(
     prefix="/admin-panel",
     tags=["Admin Panel - Gerenciamento de Administradores do Sistema"]
 )
 
-# ... (endpoints de login, me, CRUD de administradores existentes) ...
 @admin_panel_router.post("/auth/token", response_model=AdminToken, summary="Login do Administrador do Painel")
 async def login_for_admin_panel_token(form_data: AdminLoginSchema):
     if not admin_service_instance:
@@ -48,7 +47,9 @@ async def read_current_admin(current_admin: Administrator = Depends(get_current_
 
 @admin_panel_router.get("/administrators", response_model=List[AdminResponseSchema], summary="Listar Todos os Administradores")
 async def list_all_administrators(
-    skip: int = 0, limit: int = 20, current_admin: Administrator = Depends(get_current_admin_user)
+    skip: int = Query(0, ge=0), 
+    limit: int = Query(20, ge=1, le=100), # Adicionada validação com Query
+    current_admin: Administrator = Depends(get_current_admin_user)
 ):
     if not admin_service_instance:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Serviço de administração indisponível.")
@@ -57,7 +58,8 @@ async def list_all_administrators(
 
 @admin_panel_router.get("/administrators/{admin_id}", response_model=AdminResponseSchema, summary="Obter um Administrador por ID")
 async def get_administrator_by_id_route(
-    admin_id: uuid.UUID, current_admin: Administrator = Depends(get_current_admin_user)
+    admin_id: uuid.UUID, 
+    current_admin: Administrator = Depends(get_current_admin_user)
 ):
     if not admin_service_instance:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Serviço de administração indisponível.")
@@ -95,20 +97,18 @@ async def update_existing_admin(
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Falha ao atualizar administrador com ID {admin_id}, mas o administrador ainda existe.")
     return updated_admin
 
-# --- NOVO ENDPOINT PARA LOGS DA API ---
+# --- ENDPOINT DE LOGS AJUSTADO ---
 @admin_panel_router.get("/logs/api", response_model=List[ApiLogResponseSchema], summary="Visualizar Logs da API")
 async def get_api_logs(
-    request: Request, # Para obter o cliente supabase do app.state se necessário
-    skip: int = 0,
-    limit: int = 50,
-    method: Optional[str] = None,
-    status_code_filter: Optional[int] = Depends(lambda status_code: int(status_code) if status_code is not None else None), # Renomeado para evitar conflito
-    path_contains: Optional[str] = None,
-    user_id_filter: Optional[uuid.UUID] = None,
-    admin_id_filter: Optional[uuid.UUID] = None,
-    current_admin: Administrator = Depends(get_current_admin_user) # Protegido
+    skip: int = Query(0, ge=0), # ge=0 significa maior ou igual a 0
+    limit: int = Query(50, ge=1, le=200), # ge=1 (pelo menos 1), le=200 (no máximo 200)
+    method: Optional[str] = Query(None, min_length=3, max_length=10), 
+    status_code_filter: Optional[int] = Query(None, alias="status_code", ge=100, le=599), # FastAPI converte e valida, alias para o query param
+    path_contains: Optional[str] = Query(None, min_length=1),
+    user_id_filter: Optional[uuid.UUID] = Query(None, alias="user_id"),
+    admin_id_filter: Optional[uuid.UUID] = Query(None, alias="admin_id"),
+    current_admin: Administrator = Depends(get_current_admin_user)
 ):
-    # Usar a instância supabase_service global para acessar o cliente
     if not supabase_service or not supabase_service.client:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Serviço Supabase indisponível para logging.")
 
@@ -117,7 +117,7 @@ async def get_api_logs(
         
         if method:
             query = query.eq("method", method.upper())
-        if status_code_filter is not None: # Checa se o filtro de status_code foi fornecido
+        if status_code_filter is not None:
             query = query.eq("status_code", status_code_filter)
         if path_contains:
             query = query.ilike("path", f"%{path_contains}%")
@@ -126,7 +126,7 @@ async def get_api_logs(
         if admin_id_filter:
             query = query.eq("admin_id", str(admin_id_filter))
         
-        response = await query.execute() # Supabase client v2 usa await
+        response = await query.execute()
         
         return response.data if response.data else []
     except Exception as e:
