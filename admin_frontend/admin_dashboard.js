@@ -112,18 +112,21 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             html += '<p>Erro ao carregar lista de administradores ou nenhum encontrado.</p>';
         }
-        html += '</div>';
-        html += `<div class="form-section" id="adminFormContainer"></div>`;
+        html += '</div>'; // Fim de .admin-list
+        html += `<div class="form-section" id="adminFormContainer"></div>`; // Container para formulários
         if (mainDashboardContentElement) mainDashboardContentElement.innerHTML = html;
         renderAdminForm('create'); // Renderiza o formulário de criação por padrão
     }
     
     function renderAdminForm(mode = 'create', adminData = {}) {
         const formContainer = document.getElementById('adminFormContainer');
-        if (!formContainer) return;
+        if (!formContainer) {
+            logDebug("Container de formulário de admin não encontrado.");
+            return;
+        }
 
         const isEditMode = mode === 'edit';
-        const title = isEditMode ? `Editar Administrador: ${adminData.username}` : 'Criar Novo Administrador';
+        const title = isEditMode ? `Editar Administrador: ${adminData.username || 'ID: '+adminData.id?.substring(0,8)}` : 'Criar Novo Administrador';
         const submitButtonText = isEditMode ? 'Salvar Alterações' : 'Criar Administrador';
         const hwidNote = isEditMode ? 
             (adminData.has_hwid ? "Fingerprint já registrado (digite novo para alterar/limpar)" : "Nenhum Fingerprint registrado (digite para adicionar)")
@@ -153,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="text" id="adminClientFingerprint" placeholder="Gerado pelo navegador ou 'CLEAR_HWID' para limpar" autocomplete="off">
                         <small>Ao editar: preencher substitui; deixar em branco mantém; 'CLEAR_HWID' remove.</small>
                      </div>`;
-        formHtml += `<button type="submit" id="adminUpsertButton">${submitButtonText}</button>`;
+        formHtml += `<button type="submit" id="adminUpsertButton" class="button">${submitButtonText}</button>`;
         if (isEditMode) {
             formHtml += `<button type="button" id="cancelEditAdminButton" class="button" style="margin-left: 10px; background-color: #7f8c8d;">Cancelar</button>`;
         }
@@ -182,37 +185,32 @@ document.addEventListener('DOMContentLoaded', () => {
         if (upsertButton) upsertButton.disabled = true;
 
         const username = document.getElementById('adminUsername').value.trim();
-        const password = document.getElementById('adminPassword').value;
+        const password = document.getElementById('adminPassword').value; // Não fazer trim
         const client_fingerprint_input = document.getElementById('adminClientFingerprint').value.trim();
         
         const payload = { username };
-        if (password) { // Envia senha apenas se preenchida (para criação ou para alteração)
-            if (password.length < 8 && mode === 'create') { // Validação mínima para nova senha
-                showDashboardMessage('A nova senha deve ter pelo menos 8 caracteres.', true);
-                if (upsertButton) upsertButton.disabled = false;
-                return;
-            }
-             if (password.length > 0 && password.length < 8 && mode === 'edit') { // Validação mínima para nova senha na edição
-                showDashboardMessage('Se for alterar, a nova senha deve ter pelo menos 8 caracteres.', true);
+        if (password) {
+            if (password.length > 0 && password.length < 8) { // Validação se senha foi digitada e é curta
+                showDashboardMessage('A nova senha (se fornecida) deve ter pelo menos 8 caracteres.', true);
                 if (upsertButton) upsertButton.disabled = false;
                 return;
             }
             payload.password = password;
-        } else if (mode === 'create') { // Senha é obrigatória para criar
+        } else if (mode === 'create') {
              showDashboardMessage('Senha é obrigatória para criar um novo administrador.', true);
              if (upsertButton) upsertButton.disabled = false;
              return;
         }
         
-        // Lógica para client_hwid_identifier
         if (client_fingerprint_input.toUpperCase() === "CLEAR_HWID") {
             payload.client_hwid_identifier = null; 
         } else if (client_fingerprint_input) {
             payload.client_hwid_identifier = client_fingerprint_input;
-        } else if (mode === 'create') { // Para criação, se em branco, pode ser null.
+        } else if (mode === 'create' && !client_fingerprint_input) { // Para criação, se em branco, envia null.
             payload.client_hwid_identifier = null;
         }
-        // Se em branco no modo de edição, não envia o campo client_hwid_identifier para não sobrescrever.
+        // Se em branco no modo de edição e não for CLEAR_HWID, o campo não é enviado no payload
+        // para que o backend não o altere (o `admin_update_data.model_dump(exclude_unset=True)` cuida disso).
 
         let shortEndpoint = '/administrators';
         let method = 'POST';
@@ -228,93 +226,90 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (result && (result.id || result.success)) {
             showDashboardMessage(`Administrador ${mode === 'edit' ? 'atualizado' : 'criado'} com sucesso!`, false);
-            navigateToSection('manageAdmins'); // Recarrega a seção
+            navigateToSection('manageAdmins');
         } else {
-            // A mensagem de erro específica já deve ter sido mostrada por fetchApi
-            showDashboardMessage(`Falha ao ${mode === 'edit' ? 'atualizar' : 'criar'} administrador. Verifique o console para detalhes.`, true);
+            showDashboardMessage(`Falha ao ${mode === 'edit' ? 'atualizar' : 'criar'} administrador. Verifique o console para detalhes ou mensagens da API.`, true);
         }
         if (upsertButton) upsertButton.disabled = false;
     }
     
     // --- Seção de Logs da API ---
-    function renderApiLogsSection(logs) {
+    function renderApiLogsSection(logs, currentFilters = {}) {
         let html = '<h3>Logs da API</h3>';
         html += `
-            <div class="log-filters form-section" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <input type="text" id="logFilterPath" placeholder="Path contém..." style="flex-grow:1; min-width: 150px;">
-                <input type="number" id="logFilterStatus" placeholder="Status" style="width: 100px;">
-                <select id="logFilterMethod" style="min-width: 120px;">
-                    <option value="">Todos Métodos</option>
-                    <option value="GET">GET</option>
-                    <option value="POST">POST</option>
-                    <option value="PUT">PUT</option>
-                    <option value="DELETE">DELETE</option>
+            <div class="log-filters form-section">
+                <input type="text" id="logFilterPath" placeholder="Path contém..." value="${currentFilters.path_contains || ''}">
+                <input type="number" id="logFilterStatus" placeholder="Status Code" value="${currentFilters.status_code || ''}" style="width: 120px;">
+                <select id="logFilterMethod">
+                    <option value="" ${!currentFilters.method ? 'selected' : ''}>Todos Métodos</option>
+                    <option value="GET" ${currentFilters.method === 'GET' ? 'selected' : ''}>GET</option>
+                    <option value="POST" ${currentFilters.method === 'POST' ? 'selected' : ''}>POST</option>
+                    <option value="PUT" ${currentFilters.method === 'PUT' ? 'selected' : ''}>PUT</option>
+                    <option value="DELETE" ${currentFilters.method === 'DELETE' ? 'selected' : ''}>DELETE</option>
+                    <option value="HEAD" ${currentFilters.method === 'HEAD' ? 'selected' : ''}>HEAD</option>
+                    <option value="OPTIONS" ${currentFilters.method === 'OPTIONS' ? 'selected' : ''}>OPTIONS</option>
                 </select>
                 <button id="applyLogFiltersButton" class="button">Filtrar</button>
-                <button id="clearLogFiltersButton" class="button" style="background-color: #95a5a6;">Limpar</button>
+                <button id="clearLogFiltersButton" class="button" style="background-color: #7f8c8d;">Limpar</button>
             </div>
         `;
-        html += '<div class="api-log-list" style="max-height: 600px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background-color: #fdfdfd;">';
+        html += '<div class="api-log-list-container"><table class="api-log-table">';
+        html += `<thead><tr><th>Timestamp</th><th>Método</th><th>Path</th><th>Status</th><th>IP</th><th>Usuário/Admin</th><th>Tags</th><th>Tempo(ms)</th><th>Erro</th></tr></thead><tbody>`;
         if (logs && Array.isArray(logs)) {
             if (logs.length === 0) {
-                html += '<p>Nenhum log encontrado para os filtros aplicados.</p>';
+                html += '<tr><td colspan="9" style="text-align:center; padding: 20px;">Nenhum log encontrado.</td></tr>';
             } else {
-                html += '<ul style="font-family: monospace; font-size: 0.8em; list-style: none; padding:0;">';
                 logs.forEach(log => {
                     const ts = new Date(log.timestamp).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'medium' });
-                    const userDisplay = log.user_id ? `User: ${log.user_id.substring(0,8)}` : (log.admin_id ? `AdmPanel: ${log.admin_id.substring(0,8)}` : 'Anon');
-                    const tagsDisplay = log.tags ? log.tags.join(', ') : 'N/A';
-                    let statusClass = '';
-                    if (log.status_code >= 500) statusClass = 'log-status-server-error';
-                    else if (log.status_code >= 400) statusClass = 'log-status-client-error';
-                    else if (log.status_code >= 300) statusClass = 'log-status-redirect';
-                    else if (log.status_code >= 200) statusClass = 'log-status-success';
-
-                    html += `
-                        <li style="border-bottom: 1px dotted #e0e0e0; padding: 6px 2px; margin-bottom: 6px; word-break: break-all;">
-                            <strong class="${statusClass}">[${ts}] ${log.method || '?'} ${log.path || '?'} ➔ ${log.status_code || '?'}</strong> (${log.processing_time_ms?.toFixed(1)}ms)<br>
-                            <small>IP: ${log.client_host || '?'} | ${userDisplay} | Tags: [${tagsDisplay}]</small><br>
-                            <small title="${log.user_agent || ''}">UA: ${log.user_agent?.substring(0, 60) || 'N/A'}...</small>
-                            ${log.error_message ? `<br><small style="color: #c0392b; font-weight: bold;">ErroMsg: ${log.error_message}</small>` : ''}
-                        </li>`;
+                    const userId = log.user_id ? `U: ${log.user_id.substring(0,6)}..` : '';
+                    const adminId = log.admin_id ? `Adm: ${log.admin_id.substring(0,6)}..` : '';
+                    const idDisplay = userId || adminId || 'Anon';
+                    const tagsDisplay = log.tags ? log.tags.join(', ') : '-';
+                    let statusClass = 'status-info';
+                    if (log.status_code >= 500) statusClass = 'status-error-server';
+                    else if (log.status_code >= 400) statusClass = 'status-error-client';
+                    else if (log.status_code >= 300) statusClass = 'status-redirect';
+                    else if (log.status_code >= 200) statusClass = 'status-success';
+                    html += `<tr>
+                        <td>${ts}</td>
+                        <td><span class="log-method log-method-${(log.method || 'UNKNOWN').toLowerCase()}">${log.method || '?'}</span></td>
+                        <td class="log-path">${log.path || '?'}</td>
+                        <td><span class="log-status ${statusClass}">${log.status_code || '?'}</span></td>
+                        <td>${log.client_host || '?'}</td><td>${idDisplay}</td>
+                        <td class="log-tags">${tagsDisplay}</td><td>${log.processing_time_ms?.toFixed(1) || '-'}</td>
+                        <td class="log-error">${log.error_message || '-'}</td>
+                    </tr>`;
                 });
-                html += '</ul>';
             }
         } else {
-            html += '<p>Erro ao carregar logs ou formato inesperado.</p>';
+            html += '<tr><td colspan="9" style="text-align:center; padding: 20px;">Erro ao carregar logs.</td></tr>';
         }
-        html += '</div>';
+        html += '</tbody></table></div>';
         return html;
     }
 
     async function loadAndRenderApiLogs(filters = { skip: 0, limit: 50 }) {
         if (!mainDashboardContentElement) return;
         mainDashboardContentElement.innerHTML = "<p>Carregando logs da API...</p>";
-
         let queryParams = `?skip=${filters.skip || 0}&limit=${filters.limit || 50}`;
         if (filters.method) queryParams += `&method=${filters.method}`;
-        if (filters.status_code_filter) queryParams += `&status_code_filter=${filters.status_code_filter}`;
+        if (filters.status_code) queryParams += `&status_code=${filters.status_code}`; // No backend, o alias é status_code
         if (filters.path_contains) queryParams += `&path_contains=${encodeURIComponent(filters.path_contains)}`;
-        
         const logs = await fetchApi(`/logs/api${queryParams}`);
-        mainDashboardContentElement.innerHTML = renderApiLogsSection(logs);
-
+        mainDashboardContentElement.innerHTML = renderApiLogsSection(logs, filters);
         document.getElementById('applyLogFiltersButton')?.addEventListener('click', () => {
-            const pathFilter = document.getElementById('logFilterPath').value;
-            const statusFilter = document.getElementById('logFilterStatus').value;
-            const methodFilter = document.getElementById('logFilterMethod').value;
-            loadAndRenderApiLogs({ 
-                path_contains: pathFilter, 
-                status_code_filter: statusFilter, 
-                method: methodFilter 
-            });
+            const currentFilters = {
+                path_contains: document.getElementById('logFilterPath').value.trim(),
+                status_code: document.getElementById('logFilterStatus').value.trim(), // Nome do campo no objeto de filtros
+                method: document.getElementById('logFilterMethod').value,
+                skip: 0, limit: 50
+            };
+            for (const key in currentFilters) {
+                if (currentFilters[key] === "" || currentFilters[key] === null) delete currentFilters[key];
+            }
+            loadAndRenderApiLogs(currentFilters);
         });
-        document.getElementById('clearLogFiltersButton')?.addEventListener('click', () => {
-            document.getElementById('logFilterPath').value = '';
-            document.getElementById('logFilterStatus').value = '';
-            document.getElementById('logFilterMethod').value = '';
-            loadAndRenderApiLogs();
-        });
+        document.getElementById('clearLogFiltersButton')?.addEventListener('click', () => loadAndRenderApiLogs());
     }
 
     // --- Navegação e Ações ---
@@ -322,10 +317,8 @@ document.addEventListener('DOMContentLoaded', () => {
         logDebug("Navegando para a seção:", sectionName);
         if (!mainDashboardContentElement) return;
         mainDashboardContentElement.innerHTML = `<p>Carregando seção ${sectionName}...</p>`;
-
         document.querySelectorAll('.dashboard-nav button').forEach(btn => btn.classList.remove('active'));
         document.querySelector(`.dashboard-nav button[data-section="${sectionName}"]`)?.classList.add('active');
-
         if (sectionName === 'manageAdmins') {
             const admins = await fetchApi('/administrators');
             renderManageAdminsSection(admins);
@@ -348,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             id: adminData.id,
                             username: adminData.username,
                             status: adminData.status,
-                            has_hwid: !!adminData.client_hwid_identifier_hash // Informa se um HWID já está registrado
+                            has_hwid: !!adminData.client_hwid_identifier_hash
                         });
                     } else {
                         showDashboardMessage("Não foi possível carregar dados do administrador para edição.", true);
@@ -360,7 +353,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mainDashboardContentElement) {
         mainDashboardContentElement.addEventListener('click', handleDashboardMainActions);
     }
-    
     if (navButtons) {
         navButtons.forEach(button => {
             button.addEventListener('click', (e) => {
@@ -369,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
             showDashboardMessage('Saindo do sistema...', false, false);
