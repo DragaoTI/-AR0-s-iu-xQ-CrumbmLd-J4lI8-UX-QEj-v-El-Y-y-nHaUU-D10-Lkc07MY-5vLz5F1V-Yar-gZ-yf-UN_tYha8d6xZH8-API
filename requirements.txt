@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
+python-multipart
 pydantic
 pydantic-settings
 python-jose[cryptography] # Para JWT com RS256
