@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (message && autoClear) {
             setTimeout(() => {
-                if (dashboardMessageElement.textContent === message) {
+                if (dashboardMessageElement.textContent === message) { // Só limpa se for a mesma mensagem
                     dashboardMessageElement.style.display = 'none';
                     dashboardMessageElement.textContent = '';
                 }
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    async function fetchApi(shortEndpoint, method = 'GET', body = null) { // shortEndpoint é ex: '/me' ou '/administrators'
+    async function fetchApi(shortEndpoint, method = 'GET', body = null) {
         const headers = {
             'Authorization': `${tokenType} ${token}`,
             'Content-Type': 'application/json',
@@ -45,13 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
             config.body = JSON.stringify(body);
         }
 
-        // USA A NOVA CONSTANTE API_PANEL_ENDPOINTS_BASE
         const fullUrl = `${API_PANEL_ENDPOINTS_BASE}${shortEndpoint}`;
         logDebug(`API Call: ${method} ${fullUrl}`, body || '');
 
         try {
             const response = await fetch(fullUrl, config);
-
             if (response.status === 401) {
                 logDebug("API retornou 401 - Token inválido/expirado.");
                 sessionStorage.removeItem(TOKEN_STORAGE_KEY);
@@ -60,15 +58,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => window.location.href = 'admin_login.html', REDIRECT_DELAY + 1000);
                 return null;
             }
-            
             if (response.status === 204) {
                 logDebug(`API Call Success (204 No Content): ${method} ${fullUrl}`);
                 return { success: true, status: 204 };
             }
-
             const data = await response.json();
             logDebug(`API Response (${response.status}): ${method} ${fullUrl}`, data);
-
             if (!response.ok) {
                 throw new Error(data.detail || `Erro HTTP ${response.status}`);
             }
@@ -81,16 +76,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadCurrentAdminInfo() {
-        const adminData = await fetchApi('/me'); // shortEndpoint
+        const adminData = await fetchApi('/me');
         if (adminData && loggedInUserElement) {
             loggedInUserElement.textContent = `Admin: ${adminData.username}`;
-            navigateToSection('manageAdmins');
+            navigateToSection('overview'); // Carrega a visão geral por padrão
         } else if (mainDashboardContentElement && !adminData) {
             mainDashboardContentElement.innerHTML = "<p>Não foi possível carregar informações do administrador.</p>";
         }
     }
 
+    // --- Seção Gerenciar Administradores ---
     function renderManageAdminsSection(admins) {
+        // (Código da sua função renderManageAdminsSection da resposta anterior)
+        // ... (cole aqui o código completo de renderManageAdminsSection, renderAdminForm, 
+        //      handleAdminUpsertSubmit, e handleDashboardMainActions para 'edit-admin')
+        // Certifique-se que ela chama renderAdminForm('create') no final
+        // e adiciona o listener para handleDashboardMainActions.
         let html = '<h3>Gerenciar Administradores</h3>';
         html += '<div class="admin-list">';
         if (admins && Array.isArray(admins)) {
@@ -117,13 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
             html += '<p>Erro ao carregar lista de administradores ou nenhum encontrado.</p>';
         }
         html += '</div>';
-
         html += `<div class="form-section" id="adminFormContainer"></div>`;
         if (mainDashboardContentElement) mainDashboardContentElement.innerHTML = html;
         renderAdminForm('create');
     }
     
     function renderAdminForm(mode = 'create', adminData = {}) {
+        // (Código da sua função renderAdminForm da resposta anterior)
+        // ... (cole aqui)
         const formContainer = document.getElementById('adminFormContainer');
         if (!formContainer) return;
 
@@ -179,6 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function handleAdminUpsertSubmit(event) {
+        // (Código da sua função handleAdminUpsertSubmit da resposta anterior)
+        // ... (cole aqui)
         event.preventDefault();
         const form = event.target;
         const mode = form.dataset.mode;
@@ -220,25 +224,116 @@ document.addEventListener('DOMContentLoaded', () => {
         if (upsertButton) upsertButton.disabled = false;
     }
     
+    // --- Seção de Logs da API ---
+    function renderApiLogsSection(logs) {
+        let html = '<h3>Logs da API</h3>';
+        html += `
+            <div class="log-filters form-section" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="logFilterPath" placeholder="Path contém..." style="flex-grow:1; min-width: 150px;">
+                <input type="number" id="logFilterStatus" placeholder="Status" style="width: 100px;">
+                <select id="logFilterMethod" style="min-width: 120px;">
+                    <option value="">Todos Métodos</option>
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+                <button id="applyLogFiltersButton" class="button">Filtrar</button>
+                <button id="clearLogFiltersButton" class="button" style="background-color: #95a5a6;">Limpar Filtros</button>
+            </div>
+        `;
+
+        html += '<div class="api-log-list" style="max-height: 600px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background-color: #fdfdfd;">';
+        if (logs && Array.isArray(logs)) {
+            if (logs.length === 0) {
+                html += '<p>Nenhum log encontrado para os filtros aplicados.</p>';
+            } else {
+                html += '<ul style="font-family: monospace; font-size: 0.8em; list-style: none; padding:0;">'; // Tamanho de fonte menor para logs
+                logs.forEach(log => {
+                    const ts = new Date(log.timestamp).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'medium' });
+                    const userDisplay = log.user_id ? `User: ${log.user_id.substring(0,8)}` : (log.admin_id ? `AdmPanel: ${log.admin_id.substring(0,8)}` : 'Anon');
+                    const tagsDisplay = log.tags ? log.tags.join(', ') : 'N/A';
+                    let statusClass = '';
+                    if (log.status_code >= 500) statusClass = 'log-status-server-error';
+                    else if (log.status_code >= 400) statusClass = 'log-status-client-error';
+                    else if (log.status_code >= 300) statusClass = 'log-status-redirect';
+                    else if (log.status_code >= 200) statusClass = 'log-status-success';
+
+                    html += `
+                        <li style="border-bottom: 1px dotted #e0e0e0; padding: 6px 2px; margin-bottom: 6px; word-break: break-all;">
+                            <strong class="${statusClass}">[${ts}] ${log.method} ${log.path} ➔ ${log.status_code}</strong> (${log.processing_time_ms?.toFixed(1)}ms)<br>
+                            <small>IP: ${log.client_host} | ${userDisplay} | Tags: [${tagsDisplay}]</small><br>
+                            <small title="${log.user_agent || ''}">UA: ${log.user_agent?.substring(0, 60) || 'N/A'}...</small>
+                            ${log.error_message ? `<br><small style="color: #c0392b; font-weight: bold;">ErroMsg: ${log.error_message}</small>` : ''}
+                        </li>`;
+                });
+                html += '</ul>';
+            }
+        } else {
+            html += '<p>Erro ao carregar logs ou formato inesperado.</p>';
+        }
+        html += '</div>';
+        return html;
+    }
+
+    async function loadAndRenderApiLogs(filters = { skip: 0, limit: 50 }) { // Adiciona skip/limit padrão
+        if (!mainDashboardContentElement) return;
+        mainDashboardContentElement.innerHTML = "<p>Carregando logs da API...</p>";
+
+        let queryParams = `?skip=${filters.skip || 0}&limit=${filters.limit || 50}`;
+        if (filters.method) queryParams += `&method=${filters.method}`;
+        if (filters.status_code_filter) queryParams += `&status_code_filter=${filters.status_code_filter}`; // Nome do param do backend
+        if (filters.path_contains) queryParams += `&path_contains=${encodeURIComponent(filters.path_contains)}`;
+        
+        const logs = await fetchApi(`/logs/api${queryParams}`);
+        mainDashboardContentElement.innerHTML = renderApiLogsSection(logs); // Passa os logs para a função de renderização
+
+        // Adicionar listeners aos filtros DEPOIS que eles foram renderizados
+        document.getElementById('applyLogFiltersButton')?.addEventListener('click', () => {
+            const pathFilter = document.getElementById('logFilterPath').value;
+            const statusFilter = document.getElementById('logFilterStatus').value;
+            const methodFilter = document.getElementById('logFilterMethod').value;
+            loadAndRenderApiLogs({ 
+                path_contains: pathFilter, 
+                status_code_filter: statusFilter, // Usa o nome correto do parâmetro
+                method: methodFilter 
+            });
+        });
+        document.getElementById('clearLogFiltersButton')?.addEventListener('click', () => {
+            document.getElementById('logFilterPath').value = '';
+            document.getElementById('logFilterStatus').value = '';
+            document.getElementById('logFilterMethod').value = '';
+            loadAndRenderApiLogs(); // Carrega com filtros limpos
+        });
+    }
+
+    // --- Navegação e Ações ---
     async function navigateToSection(sectionName) {
         logDebug("Navegando para a seção:", sectionName);
         if (!mainDashboardContentElement) return;
         mainDashboardContentElement.innerHTML = `<p>Carregando seção ${sectionName}...</p>`;
 
+        document.querySelectorAll('.dashboard-nav button').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.dashboard-nav button[data-section="${sectionName}"]`)?.classList.add('active');
+
+
         if (sectionName === 'manageAdmins') {
-            const admins = await fetchApi('/administrators'); // shortEndpoint
+            const admins = await fetchApi('/administrators');
             renderManageAdminsSection(admins);
-        } else {
-            mainDashboardContentElement.innerHTML = '<h3>Visão Geral</h3><p>Bem-vindo ao painel. Selecione uma opção.</p>';
+        } else if (sectionName === 'apiLogs') {
+            await loadAndRenderApiLogs();
+        } else { // overview ou default
+            mainDashboardContentElement.innerHTML = '<h3>Visão Geral</h3><p>Bem-vindo ao painel de administração.</p>';
         }
     }
     
     function handleDashboardMainActions(event) {
         const target = event.target;
+        // Delegação para botões de editar admin
         if (target.classList.contains('edit-admin')) {
             event.preventDefault();
             const adminId = target.dataset.id;
-            fetchApi(`/administrators/${adminId}`) // shortEndpoint
+            fetchApi(`/administrators/${adminId}`)
                 .then(adminData => {
                     if(adminData) {
                         renderAdminForm('edit', {
@@ -247,6 +342,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             status: adminData.status,
                             has_hwid: !!adminData.client_hwid_identifier_hash
                         });
+                    } else {
+                        showDashboardMessage("Não foi possível carregar dados do administrador para edição.", true);
                     }
                 });
         }
@@ -267,12 +364,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
-            showDashboardMessage('Saindo do sistema...', false, 10000);
+            showDashboardMessage('Saindo do sistema...', false, false); // Não auto-limpar
             sessionStorage.removeItem(TOKEN_STORAGE_KEY);
             sessionStorage.removeItem(TOKEN_TYPE_STORAGE_KEY);
-            setTimeout(() => {
-                window.location.href = 'admin_login.html';
-            }, REDIRECT_DELAY / 2);
+            setTimeout(() => { window.location.href = 'admin_login.html'; }, REDIRECT_DELAY / 2);
         });
     }
 
