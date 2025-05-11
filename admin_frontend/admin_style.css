@@ -1,4 +1,4 @@
-/* admin_frontend/admin_style.css - Versão Combinada e Aprimorada */
+/* admin_frontend/admin_style.css - Versão Corrigida */
 
 :root {
   /* Paleta de cores principal */
@@ -40,14 +40,14 @@
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
   
-  /* Log específico */
-  --log-bg: #13151f;
-  --log-header-bg: #1a1d2e;
-  --log-border: #292d3e;
-  --log-text: #e4e6ef;
-  --log-text-dim: #a0a8bd;
-  --log-row-hover: #1e2133;
-  --log-row-alt: #171a29;
+  /* Log específico - CORRIGIDO para tema claro */
+  --log-bg: #ffffff;
+  --log-header-bg: #f5f7fa;
+  --log-border: #e4e9f2;
+  --log-text: #323a45;
+  --log-text-dim: #5f6b7a;
+  --log-row-hover: #f0f2f8;
+  --log-row-alt: #f7f9fc;
 }
 
 * {
@@ -387,7 +387,7 @@ button:disabled::before, .button:disabled::before {
   color: var(--error);
 }
 
-/* Seção de logs completamente renovada */
+/* Seção de logs completamente reformulada para tema claro */
 .api-logs-section {
   margin-top: 30px;
   margin-bottom: 40px;
@@ -410,7 +410,7 @@ button:disabled::before, .button:disabled::before {
   background-color: var(--log-bg);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   border: 1px solid var(--log-border);
   margin-top: 20px;
 }
@@ -425,7 +425,7 @@ button:disabled::before, .button:disabled::before {
 }
 
 .api-log-header-title {
-  color: var(--log-text);
+  color: var(--text-main);
   font-weight: 700;
   font-size: 1.1em;
   display: flex;
@@ -443,8 +443,8 @@ button:disabled::before, .button:disabled::before {
 }
 
 .api-log-controls button {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--log-text);
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-main);
   border: none;
   border-radius: 6px;
   padding: 6px 12px;
@@ -454,7 +454,7 @@ button:disabled::before, .button:disabled::before {
 }
 
 .api-log-controls button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .api-log-controls button.active {
@@ -471,7 +471,7 @@ button:disabled::before, .button:disabled::before {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  color: var(--log-text);
+  color: var(--text-main);
   font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
   font-size: 0.88em;
 }
@@ -483,7 +483,7 @@ button:disabled::before, .button:disabled::before {
   padding: 15px 16px;
   text-align: left;
   font-weight: 600;
-  color: var(--log-text-dim);
+  color: var(--text-light);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-size: 0.85em;
@@ -492,7 +492,7 @@ button:disabled::before, .button:disabled::before {
 
 .api-log-table tbody tr {
   transition: background-color var(--transition-fast);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--log-border);
 }
 
 .api-log-table tbody tr:nth-child(even) {
@@ -506,20 +506,20 @@ button:disabled::before, .button:disabled::before {
 .api-log-table td {
   padding: 14px 16px;
   vertical-align: middle;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 /* Timestamp com estilo de data */
 .log-timestamp {
   white-space: nowrap;
-  color: var(--log-text-dim);
+  color: var(--text-light);
   font-size: 0.9em;
   padding: 0 !important;
   width: 140px;
 }
 
 .log-time {
-  color: var(--log-text);
+  color: var(--text-main);
   font-weight: 500;
   font-size: 0.85em;
   margin-top: 2px;
@@ -541,43 +541,43 @@ button:disabled::before, .button:disabled::before {
   font-size: 0.8em;
   min-width: 60px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   letter-spacing: 0.5px;
 }
 
 .method-get {
   background-color: rgba(52, 152, 219, 0.15);
-  color: #3498db;
+  color: var(--method-get);
   border: 1px solid rgba(52, 152, 219, 0.3);
 }
 
 .method-post {
   background-color: rgba(46, 204, 113, 0.15);
-  color: #2ecc71;
+  color: var(--method-post);
   border: 1px solid rgba(46, 204, 113, 0.3);
 }
 
 .method-put {
   background-color: rgba(243, 156, 18, 0.15);
-  color: #f39c12;
+  color: var(--method-put);
   border: 1px solid rgba(243, 156, 18, 0.3);
 }
 
 .method-delete {
   background-color: rgba(231, 76, 60, 0.15);
-  color: #e74c3c;
+  color: var(--method-delete);
   border: 1px solid rgba(231, 76, 60, 0.3);
 }
 
 .method-head {
   background-color: rgba(155, 89, 182, 0.15);
-  color: #9b59b6;
+  color: var(--method-head);
   border: 1px solid rgba(155, 89, 182, 0.3);
 }
 
 .method-patch {
   background-color: rgba(26, 188, 156, 0.15);
-  color: #1abc9c;
+  color: var(--method-patch);
   border: 1px solid rgba(26, 188, 156, 0.3);
 }
 
@@ -599,7 +599,7 @@ button:disabled::before, .button:disabled::before {
   text-overflow: ellipsis;
   max-width: 100%;
   padding: 4px 8px;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(0, 0, 0, 0.03);
   border-radius: 4px;
   position: relative;
   transition: all var(--transition-fast);
@@ -608,7 +608,7 @@ button:disabled::before, .button:disabled::before {
 .log-path-text:hover {
   white-space: normal;
   word-break: break-all;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.05);
   cursor: pointer;
 }
 
@@ -630,22 +630,22 @@ button:disabled::before, .button:disabled::before {
 
 .status-2xx {
   background-color: rgba(46, 204, 113, 0.15);
-  color: #2ecc71;
+  color: var(--status-2xx);
 }
 
 .status-3xx {
   background-color: rgba(52, 152, 219, 0.15);
-  color: #3498db;
+  color: var(--status-3xx);
 }
 
 .status-4xx {
   background-color: rgba(243, 156, 18, 0.15);
-  color: #f39c12;
+  color: var(--status-4xx);
 }
 
 .status-5xx {
   background-color: rgba(231, 76, 60, 0.15);
-  color: #e74c3c;
+  color: var(--status-5xx);
 }
 
 /* IP estilizado */
@@ -660,12 +660,12 @@ button:disabled::before, .button:disabled::before {
   font-family: 'Fira Code', monospace;
   padding: 3px 6px;
   border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(0, 0, 0, 0.03);
   transition: all var(--transition-fast);
 }
 
 .ip-address:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.05);
   cursor: pointer;
 }
 
@@ -679,7 +679,7 @@ button:disabled::before, .button:disabled::before {
   padding: 3px 8px;
   border-radius: 4px;
   background-color: rgba(155, 89, 182, 0.15);
-  color: #9b59b6;
+  color: var(--secondary);
   font-size: 0.85em;
 }
 
@@ -696,22 +696,22 @@ button:disabled::before, .button:disabled::before {
   border-radius: 3px;
   font-size: 0.8em;
   background-color: rgba(52, 152, 219, 0.15);
-  color: #3498db;
+  color: var(--method-get);
 }
 
 .tag-api_request {
   background-color: rgba(52, 152, 219, 0.15);
-  color: #3498db;
+  color: var(--method-get);
 }
 
 .tag-admin_panel_api {
   background-color: rgba(155, 89, 182, 0.15);
-  color: #9b59b6;
+  color: var(--method-head);
 }
 
 .tag-error_client {
   background-color: rgba(243, 156, 18, 0.15);
-  color: #f39c12;
+  color: var(--method-put);
 }
 
 /* Tempo de resposta estilizado */
@@ -729,15 +729,15 @@ button:disabled::before, .button:disabled::before {
 
 /* Cores baseadas na velocidade */
 .time-fast {
-  color: #2ecc71;
+  color: var(--status-2xx);
 }
 
 .time-medium {
-  color: #f39c12;
+  color: var(--status-4xx);
 }
 
 .time-slow {
-  color: #e74c3c;
+  color: var(--status-5xx);
 }
 
 /* Coluna de erro */
@@ -747,16 +747,16 @@ button:disabled::before, .button:disabled::before {
 }
 
 .error-icon {
-  color: #e74c3c;
+  color: var(--error);
   font-weight: bold;
 }
 
 .no-error {
-  color: var(--log-text-dim);
+  color: var(--text-light);
   opacity: 0.4;
 }
 
-/* Filtros de log com visual aprimorado */
+/* Filtros de log com visual aprimorado - Tema claro */
 .log-filters {
   background-color: var(--log-header-bg);
   border-radius: 10px;
@@ -776,7 +776,7 @@ button:disabled::before, .button:disabled::before {
 .filter-label {
   display: block;
   margin-bottom: 8px;
-  color: var(--log-text-dim);
+  color: var(--text-light);
   font-size: 0.85em;
   font-weight: 600;
 }
@@ -784,24 +784,24 @@ button:disabled::before, .button:disabled::before {
 .filter-input {
   width: 100%;
   padding: 10px 14px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  color: var(--log-text);
+  color: var(--text-main);
   font-size: 0.9em;
   transition: all var(--transition-fast);
 }
 
 .filter-input:focus {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--white);
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
 }
 
 .filter-select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a0a8bd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%235f6b7a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 16px;
@@ -830,8 +830,8 @@ button:disabled::before, .button:disabled::before {
 }
 
 .filter-reset {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--log-text);
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-main);
 }
 
 .filter-apply:hover {
@@ -839,7 +839,7 @@ button:disabled::before, .button:disabled::before {
 }
 
 .filter-reset:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Paginação de logs */
@@ -851,12 +851,12 @@ button:disabled::before, .button:disabled::before {
   padding: 15px;
   background-color: var(--log-header-bg);
   border-radius: 8px;
-  color: var(--log-text);
+  color: var(--text-main);
 }
 
 .page-info {
   font-size: 0.9em;
-  color: var(--log-text-dim);
+  color: var(--text-light);
 }
 
 .page-controls {
@@ -865,9 +865,9 @@ button:disabled::before, .button:disabled::before {
 }
 
 .page-button {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.05);
   border: none;
-  color: var(--log-text);
+  color: var(--text-main);
   border-radius: 4px;
   padding: 8px 12px;
   font-size: 0.9em;
@@ -876,7 +876,7 @@ button:disabled::before, .button:disabled::before {
 }
 
 .page-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .page-button:disabled {
@@ -893,14 +893,14 @@ button:disabled::before, .button:disabled::before {
 .log-loading {
   text-align: center;
   padding: 40px 0;
-  color: var(--log-text-dim);
+  color: var(--text-light);
 }
 
 .loading-spinner {
   display: inline-block;
   width: 30px;
   height: 30px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
+  border: 3px solid rgba(0, 0, 0, 0.05);
   border-radius: 50%;
   border-top-color: var(--primary);
   animation: spin 1s ease-in-out infinite;
@@ -962,3 +962,4 @@ button:disabled::before, .button:disabled::before {
   .api-log-table {
     font-size: 0.8em;
   }
+}
